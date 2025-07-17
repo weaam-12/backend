@@ -1,13 +1,12 @@
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 
 # نسخ الملفات الأساسية
-COPY mvnw pom.xml ./
+COPY pom.xml .
 COPY src ./src
 
-# تثبيت Maven مباشرة (بدون الاعتماد على .mvn)
+# تثبيت Maven
 RUN apt-get update && apt-get install -y maven
-RUN mvn dependency:go-offline
 
 # بناء التطبيق
 RUN mvn package -DskipTests
