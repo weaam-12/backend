@@ -1,8 +1,16 @@
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY .mvn/ .mvn
+
+# نسخ الملفات الأساسية
 COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline
 COPY src ./src
-RUN ./mvnw package -DskipTests
+
+# تثبيت Maven مباشرة (بدون الاعتماد على .mvn)
+RUN apt-get update && apt-get install -y maven
+RUN mvn dependency:go-offline
+
+# بناء التطبيق
+RUN mvn package -DskipTests
+
+# التشغيل
 CMD ["java", "-jar", "target/service-management-0.0.1-SNAPSHOT.jar"]
