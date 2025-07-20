@@ -75,7 +75,11 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error"
                         ).permitAll()
-
+                        .requestMatchers(
+                                "/api/**", // سماح عام لجميع مسارات /api
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/residents/**")
                         .hasAnyRole("ADMIN", "RESIDENT")
 
@@ -102,10 +106,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://ummbatin-website.onrender.com"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedOrigins(List.of(
+                "https://ummbatin-website.onrender.com",
+                "http://localhost:3000" // للتطوير المحلي
+        ));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
