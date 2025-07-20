@@ -65,12 +65,13 @@ public class SecurityConfig {
                                 "/error",
                                 "/api/complaints/**" // أضف هذا السطر
                         ).permitAll()
-
-                                .requestMatchers(HttpMethod.GET, "/api/residents/**").hasAnyRole("ADMIN", "RESIDENT")
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/residents/**").hasAnyRole("ADMIN", "RESIDENT")
                                 .requestMatchers(HttpMethod.POST, "/api/residents/**").hasRole("ADMIN")
                                 .requestMatchers("/api/complaints/resident/**").permitAll()
                                 .requestMatchers("/api/users/profile").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+
 
 
 
