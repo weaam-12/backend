@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/error",
+                                "/",                    // ✅ السماح للمسار الرئيسي /
                                 "/api/complaints/**" // أضف هذا السطر
                         ).permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
