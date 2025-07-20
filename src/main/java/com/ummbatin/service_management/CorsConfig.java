@@ -13,7 +13,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:5173",
                         "https://ummbatin-website.vercel.app",
-                        "https://ummbatin-website.onrender.com")
+                        "https://ummbatin-website.onrender.com","https://backend-wtgq.onrender.com")
+
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true);
