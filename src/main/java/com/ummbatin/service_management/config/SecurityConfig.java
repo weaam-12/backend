@@ -76,19 +76,16 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
-                        // ✅ مسارات GET لعرض البيانات (صلاحيات محددة)
                         .requestMatchers(HttpMethod.GET, "/api/residents/**")
                         .hasAnyRole("ADMIN", "RESIDENT")
 
-                        // ✅ مسارات POST للتعديلات (صلاحية ADMIN فقط)
                         .requestMatchers(HttpMethod.POST, "/api/residents/**")
                         .hasRole("ADMIN")
 
-                        // ✅ مسارات تتطلب تسجيل الدخول
                         .requestMatchers("/api/users/profile")
                         .authenticated()
-
-                        // ✅ الباقي كله يحتاج توثيق
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/api/auth/**").permitAll() // ضروري لـ preflight
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
