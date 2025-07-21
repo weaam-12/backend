@@ -131,4 +131,16 @@ public class PaymentController {
                     .body(new ApiResponse(false, "Payment processing failed: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/users-with-payments")
+    public ResponseEntity<List<UserWithPaymentsDto>> getUsersWithPayments(
+            @RequestParam int month,
+            @RequestParam int year) {
+        try {
+            List<UserWithPaymentsDto> result = paymentService.getUsersWithPayments(month, year);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
