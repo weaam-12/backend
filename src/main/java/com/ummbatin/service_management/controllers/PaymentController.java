@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -109,7 +110,17 @@ public class PaymentController {
                     .body(new ApiResponse(false, "Failed to update payment status: " + e.getMessage()));
         }
     }
-
+    @GetMapping("/current-month")
+    public ResponseEntity<List<PaymentDto>> getCurrentMonthPayments() {
+        try {
+            int currentMonth = LocalDate.now().getMonthValue();
+            int currentYear = LocalDate.now().getYear();
+            List<PaymentDto> payments = paymentService.getAllPayments(currentMonth, currentYear, null);
+            return ResponseEntity.ok(payments);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     @PostMapping("/process")
     public ResponseEntity<?> processPayment(@RequestBody PaymentRequest paymentRequest) {
         try {

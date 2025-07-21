@@ -7,9 +7,13 @@ import com.stripe.param.PaymentIntentCreateParams;
 import com.ummbatin.service_management.dtos.PaymentDto;
 import com.ummbatin.service_management.dtos.PaymentRequest;
 import com.ummbatin.service_management.dtos.PaymentResponse;
+import com.ummbatin.service_management.dtos.UserWithPaymentsDto;
 import com.ummbatin.service_management.models.Payment;
+import com.ummbatin.service_management.models.Property;
 import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.repositories.PaymentRepository;
+import com.ummbatin.service_management.repositories.PropertyRepository;
+import com.ummbatin.service_management.repositories.UserRepository;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +33,12 @@ public class PaymentService {
     @Value("${stripe.api.key}")
     private String stripeApiKey;
 
-    // الدوال الحالية
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PropertyRepository propertyRepository;
+
     public PaymentIntent createPaymentIntent(Long amountInCents) throws StripeException {
         Stripe.apiKey = stripeApiKey;
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
@@ -71,7 +80,6 @@ public class PaymentService {
     }
 
     public ApiResponse updatePaymentStatus(Integer paymentId, String status) {
-        // تنفيذ المنطق المطلوب لتحديث حالة الدفع
         Optional<Payment> payment = paymentRepository.findById(paymentId);
         if (payment.isPresent()) {
             Payment p = payment.get();
@@ -102,6 +110,7 @@ public class PaymentService {
         List<Payment> payments = paymentRepository.findByUser_UserIdAndPaymentDateAfter(userId, cutoffDate);
         return payments.stream().map(this::convertToDto).collect(Collectors.toList());
     }
+
     public List<PaymentDto> getAllPayments(Integer month, Integer year, Long userId) {
         List<Payment> payments;
         if (userId != null) {
@@ -118,37 +127,66 @@ public class PaymentService {
             dto.setPaymentType(payment.getType());
             dto.setAmount(payment.getAmount());
             dto.setStatus(payment.getStatus());
-            dto.setDate(payment.getDate()); // استخدام date كـ dueDate
+            dto.setDate(payment.getDate());
             dto.setPaymentDate(payment.getPaymentDate() != null ?
                     payment.getPaymentDate().toLocalDate() : null);
             return dto;
         }).collect(Collectors.toList());
     }
+
     public PaymentResponse processPayment(PaymentRequest paymentRequest) throws StripeException {
-        // Create payment intent with Stripe
         PaymentIntent paymentIntent = createPaymentIntent(paymentRequest.getAmount());
 
-        // Save payment record in database
         Payment payment = new Payment();
-        payment.setUser(new User()); // You'll need to set the actual user from repository
+        payment.setUser(new User());
         payment.getUser().setUserId(paymentRequest.getUserId());
-        payment.setAmount(paymentRequest.getAmount().doubleValue() / 100); // Convert cents to dollars
+        payment.setAmount(paymentRequest.getAmount().doubleValue() / 100);
         payment.setType(paymentRequest.getPaymentType());
         payment.setStatus("PENDING");
         payment.setTransactionId(paymentIntent.getId());
         payment.setDate(LocalDate.now());
         paymentRepository.save(payment);
 
-        // Create and return response
         PaymentResponse response = new PaymentResponse();
         response.setPaymentId(paymentIntent.getId());
         response.setClientSecret(paymentIntent.getClientSecret());
         response.setAmount(paymentRequest.getAmount());
         response.setCurrency(paymentRequest.getCurrency());
         response.setDescription(paymentRequest.getDescription());
-        response.setStatus("requires_payment_method"); // Initial Stripe status
+        response.setStatus("requires_payment_method");
 
         return response;
     }
 
+    public List<UserWithPaymentsDto> getUsersWithPayments(int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<User> users = userRepository.findAll();
+        return users.stream().map(user -> {
+            UserWithPaymentsDto dto = new UserWithPaymentsDto();
+            dto.setUserId(user.getUserId());
+            dto.setUserName(user.getFullName());
+
+            List<Property> userProperties = propertyRepository.findByUser_UserId(user.getUserId());
+            String address = userProperties.isEmpty() ? "N/A" : userProperties.get(0).getAddress();
+            dto.setPropertyAddress(address);
+
+            List<Payment> payments = paymentRepository.findByUserAndDateBetween(user, startDate, endDate);
+
+            payments.forEach(payment -> {
+                if ("WATER".equals(payment.getType())) {
+                    dto.setWaterAmount(payment.getAmount());
+                    dto.setWaterPaymentId(payment.getPaymentId());
+                    dto.setWaterStatus(payment.getStatus());
+                } else if ("ARNONA".equals(payment.getType())) {
+                    dto.setArnonaAmount(payment.getAmount());
+                    dto.setArnonaPaymentId(payment.getPaymentId());
+                    dto.setArnonaStatus(payment.getStatus());
+                }
+            });
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }
