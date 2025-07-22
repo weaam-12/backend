@@ -61,7 +61,17 @@ public class User implements UserDetails {
                 new SimpleGrantedAuthority(role.getRoleName().toUpperCase())
         );
     }
+    @Column(name = "last_water_reading")
+    private Double lastWaterReading;
 
+    // مع الجيتار والستار
+    public Double getLastWaterReading() {
+        return lastWaterReading;
+    }
+
+    public void setLastWaterReading(Double lastWaterReading) {
+        this.lastWaterReading = lastWaterReading;
+    }
     @Override
     public String getUsername() {
         return email;

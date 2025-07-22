@@ -7,7 +7,7 @@ import java.util.List;
 
 @Repository
 public interface WaterReadingRepository extends JpaRepository<WaterReading, Long> {
-
     List<WaterReading> findByProperty_PropertyId(Long propertyId);
-
+    List<WaterReading> findByProperty_PropertyIdOrderByDateDesc(Long propertyId);
+    List<WaterReading> findByUser_UserId(Long userId);
 }

@@ -4,16 +4,15 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
-import com.ummbatin.service_management.dtos.PaymentDto;
-import com.ummbatin.service_management.dtos.PaymentRequest;
-import com.ummbatin.service_management.dtos.PaymentResponse;
-import com.ummbatin.service_management.dtos.UserWithPaymentsDto;
+import com.ummbatin.service_management.dtos.*;
 import com.ummbatin.service_management.models.Payment;
 import com.ummbatin.service_management.models.Property;
 import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.models.WaterReading;
 import com.ummbatin.service_management.repositories.PaymentRepository;
 import com.ummbatin.service_management.repositories.PropertyRepository;
 import com.ummbatin.service_management.repositories.UserRepository;
+import com.ummbatin.service_management.repositories.WaterReadingRepository;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -157,6 +157,52 @@ public class PaymentService {
 
         return response;
     }
+    public ApiResponse generateCustomWaterPayments(List<CustomWaterPaymentRequest> requests) {
+        try {
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            List<Payment> generatedPayments = new ArrayList<>();
+
+            for (CustomWaterPaymentRequest request : requests) {
+                if (request.getAmount() == null || request.getAmount() <= 0) continue;
+
+                User user = userRepository.findById(request.getUserId())
+                        .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+
+                Property property = propertyRepository.findById(Math.toIntExact(request.getPropertyId()))
+                        .orElseThrow(() -> new RuntimeException("Property not found with id: " + request.getPropertyId()));
+
+                // Create payment
+                Payment payment = new Payment();
+                payment.setUser(user);
+                payment.setProperty(property);
+                payment.setServiceId(1L); // Assuming 1 is for water
+                payment.setAmount(request.getAmount());
+                payment.setDate(currentDateTime.toLocalDate());
+                payment.setStatus("PENDING");
+                payment.setType("WATER");
+
+                // Save water reading if provided
+                if (request.getCurrentReading() != null && request.getCurrentReading() > 0) {
+                    WaterReading reading = new WaterReading();
+                    reading.setProperty(property);
+                    reading.setAmount(request.getCurrentReading());
+                    reading.setDate(currentDateTime);
+                    reading.setApproved(true);
+                    reading.setManual(request.getManual() != null ? request.getManual() : false);
+                    waterReadingRepository.save(reading);
+                }
+
+                generatedPayments.add(paymentRepository.save(payment));
+            }
+
+            return new ApiResponse(true, "Successfully generated " + generatedPayments.size() + " water payments");
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating custom water payments: " + e.getMessage(), e);
+        }
+    }
+
+    @Autowired
+    private WaterReadingRepository waterReadingRepository;
 
     public List<UserWithPaymentsDto> getUsersWithPayments(int month, int year) {
         LocalDate startDate = LocalDate.of(year, month, 1);
@@ -169,11 +215,21 @@ public class PaymentService {
             dto.setUserName(user.getFullName());
 
             List<Property> userProperties = propertyRepository.findByUser_UserId(user.getUserId());
-            String address = userProperties.isEmpty() ? "N/A" : userProperties.get(0).getAddress();
-            dto.setPropertyAddress(address);
+            if (!userProperties.isEmpty()) {
+                Property property = userProperties.get(0);
+                dto.setPropertyId(property.getPropertyId());
+                dto.setPropertyAddress(property.getAddress());
+
+                // Get latest water reading
+                List<WaterReading> readings = waterReadingRepository.findByProperty_PropertyIdOrderByDateDesc(property.getPropertyId());
+                if (!readings.isEmpty()) {
+                    WaterReading latestReading = readings.get(0);
+                    dto.setLastWaterReading(latestReading.getAmount());
+                    dto.setManual(latestReading.getManual());
+                }
+            }
 
             List<Payment> payments = paymentRepository.findByUserAndDateBetween(user, startDate, endDate);
-
             payments.forEach(payment -> {
                 if ("WATER".equals(payment.getType())) {
                     dto.setWaterAmount(payment.getAmount());
@@ -189,4 +245,5 @@ public class PaymentService {
             return dto;
         }).collect(Collectors.toList());
     }
+
 }

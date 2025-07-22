@@ -143,4 +143,17 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/generate-custom-water")
+    public ResponseEntity<ApiResponse> generateCustomWaterPayments(
+            @RequestBody List<CustomWaterPaymentRequest> requests) {
+        try {
+            ApiResponse response = paymentService.generateCustomWaterPayments(requests);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "Failed to generate custom water payments: " + e.getMessage()));
+        }
+    }
+
 }

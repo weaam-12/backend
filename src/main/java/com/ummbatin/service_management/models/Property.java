@@ -10,7 +10,7 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "property_id")
-    private Integer propertyId;
+    private long propertyId;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -32,7 +32,7 @@ public class Property {
     private List<Payment> payments;
 
     // Getters and Setters
-    public Integer getPropertyId() {
+    public Long getPropertyId() {
         return propertyId;
     }
 
