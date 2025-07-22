@@ -48,6 +48,41 @@ public class PaymentService {
                 .build();
         return PaymentIntent.create(params);
     }
+    public Payment createPayment(Long userId, Double amount, String type, String transactionId) {
+        // 1. التحقق من وجود فاتورة لنفس المستخدم ونفس النوع في الشهر الحالي
+        LocalDate now = LocalDate.now();
+        LocalDate firstOfMonth = now.withDayOfMonth(1);
+        LocalDate lastOfMonth = now.withDayOfMonth(now.lengthOfMonth());
+
+        List<Payment> existingPayments = paymentRepository.findByUser_UserIdAndTypeAndDateBetween(
+                userId,
+                type,
+                firstOfMonth,
+                lastOfMonth
+        );
+
+        if (!existingPayments.isEmpty()) {
+            throw new RuntimeException("يوجد فاتورة " + type + " لهذا المستخدم في الشهر الحالي بالفعل");
+        }
+
+        // 2. إنشاء الفاتورة الجديدة
+        Payment payment = new Payment();
+        payment.setUser(userRepository.findById(userId).orElseThrow());
+        payment.setProperty(propertyRepository.findByUser_UserId(userId).get(0)); // أول عقار للمستخدم
+        payment.setAmount(amount);
+        payment.setType(type);
+        payment.setDate(now);
+        payment.setStatus("PENDING");
+        return paymentRepository.save(payment);
+    }
+
+    public List<Payment> getPaymentsByType(String type) {
+        return paymentRepository.findByType(type);
+    }
+
+    public List<Payment> getUserPaymentsByType(Long userId, String type) {
+        return paymentRepository.findByUser_UserIdAndType(userId, type);
+    }
 
     public void markPaymentAsCompleted(Long userId, String serviceId, String paymentIntentId, String receiptEmail) {
         Optional<Payment> optionalPayment = paymentRepository.findByUser_UserIdAndServiceIdAndTransactionId(

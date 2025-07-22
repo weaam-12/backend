@@ -29,4 +29,17 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
             Long serviceId,
             String transactionId
     );
+    List<Payment> findByUser_UserIdAndTypeAndDateBetween(
+            Long userId,
+            String type,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+    boolean existsByUserAndTypeAndDateBetween(
+            User user,
+            String type,
+            LocalDate startDate,
+            LocalDate endDate);
+    List<Payment> findByType(String type);
+    List<Payment> findByUser_UserIdAndType(Long userId, String type);
 }

@@ -3,6 +3,7 @@ package com.ummbatin.service_management.controllers;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.ummbatin.service_management.dtos.*;
+import com.ummbatin.service_management.models.Payment;
 import com.ummbatin.service_management.services.PaymentService;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -143,7 +144,41 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    // إنشاء فاتورة مياه
+    @PostMapping("/create-water")
+    public ResponseEntity<Payment> createWaterPayment(
+            @RequestParam Long userId,
+            @RequestParam Double amount,
+            @RequestParam(required = false) String transactionId) {
+        Payment payment = paymentService.createPayment(userId, amount, "WATER", transactionId);
+        return ResponseEntity.ok(payment);
+    }
 
+    // إنشاء فاتورة أرنونا
+    @PostMapping("/create-arnona")
+    public ResponseEntity<Payment> createArnonaPayment(
+            @RequestParam Long userId,
+            @RequestParam Double amount,
+            @RequestParam(required = false) String transactionId) {
+        Payment payment = paymentService.createPayment(userId, amount, "ARNONA", transactionId);
+        return ResponseEntity.ok(payment);
+    }
+
+    // الحصول على جميع الفواتير حسب النوع
+    @GetMapping("/by-type")
+    public ResponseEntity<List<Payment>> getPaymentsByType(@RequestParam String type) {
+        List<Payment> payments = paymentService.getPaymentsByType(type);
+        return ResponseEntity.ok(payments);
+    }
+
+    // الحصول على فواتير مستخدم معين حسب النوع
+    @GetMapping("/user/{userId}/by-type")
+    public ResponseEntity<List<Payment>> getUserPaymentsByType(
+            @PathVariable Long userId,
+            @RequestParam String type) {
+        List<Payment> payments = paymentService.getUserPaymentsByType(userId, type);
+        return ResponseEntity.ok(payments);
+    }
     @PostMapping("/generate-custom-water")
     public ResponseEntity<ApiResponse> generateCustomWaterPayments(
             @RequestBody List<CustomWaterPaymentRequest> requests) {
