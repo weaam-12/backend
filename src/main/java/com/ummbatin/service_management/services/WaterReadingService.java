@@ -12,6 +12,10 @@ public class WaterReadingService {
     @Autowired
     private WaterReadingRepository waterReadingRepository;
 
+    public List<WaterReading> getWaterReadingsByUser(Long userId) {
+        return waterReadingRepository.findByProperty_User_UserId(userId);
+    }
+
     public List<WaterReading> getWaterReadingsByProperty(Long propertyId) {
         return waterReadingRepository.findByProperty_PropertyId(propertyId);
     }

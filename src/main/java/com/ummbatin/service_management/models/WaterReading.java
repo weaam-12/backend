@@ -10,6 +10,9 @@ public class WaterReading {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    private Property property;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -22,10 +25,6 @@ public class WaterReading {
 
     @Column(name = "is_manual", nullable = false)
     private Boolean isManual;
-
-    @ManyToOne
-    @JoinColumn(name = "property_id", nullable = false)
-    private Property property;
 
     public Long getId() {
         return id;
