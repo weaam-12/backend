@@ -99,9 +99,44 @@ public class PaymentService {
         }
     }
 
-    public ApiResponse generateWaterBills(int month, int year, double rate, Long userId) {
-        // تنفيذ المنطق المطلوب لتوليد فواتير المياه
-        return new ApiResponse(true, "Water bills generated successfully");
+        public ApiResponse generateWaterBills(int month, int year, double rate, Long userId) {
+            List<User> users = userId != null
+                    ? List.of(userRepository.findById(userId).orElseThrow())
+                    : userRepository.findAll();
+
+            for (User user : users) {
+                for (Property property : user.getProperties()) {
+                    double amount = calculateWaterAmount(property, rate);
+
+                    // ✅ تجنب التكرار: لو فيه فاتورة مياه في نفس الشهر متضيفهاش
+                    boolean exists = paymentRepository.existsByUserAndTypeAndDateBetween(
+                            user, "WATER",
+                            LocalDate.of(year, month, 1),
+                            LocalDate.of(year, month, 1).withDayOfMonth(LocalDate.of(year, month, 1).lengthOfMonth())
+                    );
+
+                    if (exists) continue;
+
+                    Payment payment = new Payment();
+                    payment.setUser(user);
+                    payment.setProperty(property);
+                    payment.setAmount(amount);
+                    payment.setType("WATER");
+                    payment.setStatus("PENDING");
+                    payment.setDate(LocalDate.of(year, month, 1));
+                    payment.setServiceId(2L); // مثلاً: 2 = خدمة المياه
+                    payment.setPaymentDate(LocalDateTime.now());
+
+                    paymentRepository.save(payment);
+                }
+            }
+
+            return new ApiResponse(true, "تم توليد فواتير المياه بنجاح");
+        }
+
+    private double calculateWaterAmount(Property property, double rate) {
+        if (property == null || property.getArea() == null) return 0.0;
+        return property.getArea().doubleValue() * rate;
     }
 
     public ApiResponse generateArnonaBills(int month, int year, Long userId) {
