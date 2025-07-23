@@ -99,41 +99,75 @@ public class PaymentService {
         }
     }
 
-        public ApiResponse generateWaterBills(int month, int year, double rate, Long userId) {
-            List<User> users = userId != null
-                    ? List.of(userRepository.findById(userId).orElseThrow())
-                    : userRepository.findAll();
+    public ApiResponse generateWaterBills(int month, int year, double rate, Long userId) {
+        List<User> users = userId != null
+                ? List.of(userRepository.findById(userId).orElseThrow())
+                : userRepository.findAll();
 
-            for (User user : users) {
-                for (Property property : user.getProperties()) {
-                    double amount = calculateWaterAmount(property, rate);
+        int generated = 0;
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
 
-                    // ✅ تجنب التكرار: لو فيه فاتورة مياه في نفس الشهر متضيفهاش
-                    boolean exists = paymentRepository.existsByUserAndTypeAndDateBetween(
-                            user, "WATER",
-                            LocalDate.of(year, month, 1),
-                            LocalDate.of(year, month, 1).withDayOfMonth(LocalDate.of(year, month, 1).lengthOfMonth())
-                    );
+        for (User user : users) {
+            for (Property prop : user.getProperties()) {
+                boolean exists = paymentRepository.existsByUserAndTypeAndDateBetween(
+                        user, "WATER", start, end);
+                if (exists) continue;
 
-                    if (exists) continue;
+                double amount = prop.getArea().doubleValue() * rate;
 
-                    Payment payment = new Payment();
-                    payment.setUser(user);
-                    payment.setProperty(property);
-                    payment.setAmount(amount);
-                    payment.setType("WATER");
-                    payment.setStatus("PENDING");
-                    payment.setDate(LocalDate.of(year, month, 1));
-                    payment.setServiceId(2L); // مثلاً: 2 = خدمة المياه
-                    payment.setPaymentDate(LocalDateTime.now());
+                Payment payment = new Payment();
+                payment.setUser(user);
+                payment.setProperty(prop);
+                payment.setAmount(amount);
+                payment.setType("WATER");
+                payment.setStatus("PENDING");
+                payment.setDate(start);
+                payment.setServiceId(2L); // خدمة المياه
+                payment.setPaymentDate(LocalDateTime.now());
 
-                    paymentRepository.save(payment);
-                }
+                paymentRepository.save(payment);
+                generated++;
             }
-
-            return new ApiResponse(true, "تم توليد فواتير المياه بنجاح");
         }
+        return new ApiResponse(true, "تم توليد " + generated + " فاتورة مياه بنجاح");
+    }
 
+    private PaymentDto toDto(Payment p) {
+        return new PaymentDto(
+                p.getPaymentId().longValue(),
+                p.getUser().getUserId(),
+                p.getUser().getFullName(),
+                p.getType(),
+                p.getAmount(),
+                p.getStatus(),
+                p.getDate(),
+                p.getProperty().getAddress(),
+                p.getProperty().getArea().doubleValue(),
+                p.getProperty().getNumberOfUnits()
+        );
+    }
+
+    public List<PaymentDto> getAllPayments(Integer month, Integer year, Long userId) {
+        List<Payment> list = (userId == null) ? paymentRepository.findAll()
+                : paymentRepository.findByUser_UserId(userId);
+        return list.stream()
+                .filter(p -> (month == null || p.getDate().getMonthValue() == month)
+                        && (year  == null || p.getDate().getYear() == year))
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<PaymentDto> getUserPayments(Long userId) {
+        return paymentRepository.findByUser_UserId(userId)
+                .stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public List<PaymentDto> getRecentPayments(Long userId) {
+        LocalDateTime cutoff = LocalDateTime.now().minusMonths(1);
+        return paymentRepository.findByUser_UserIdAndPaymentDateAfter(userId, cutoff)
+                .stream().map(this::toDto).collect(Collectors.toList());
+    }
     private double calculateWaterAmount(Property property, double rate) {
         if (property == null || property.getArea() == null) return 0.0;
         return property.getArea().doubleValue() * rate;
@@ -187,40 +221,6 @@ public class PaymentService {
         dto.setAmount(payment.getAmount());
         dto.setStatus(payment.getStatus());
         return dto;
-    }
-
-    public List<PaymentDto> getUserPayments(Long userId) {
-        List<Payment> payments = paymentRepository.findByUser_UserId(userId);
-        return payments.stream().map(this::convertToDto).collect(Collectors.toList());
-    }
-
-    public List<PaymentDto> getRecentPayments(Long userId) {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusMonths(1);
-        List<Payment> payments = paymentRepository.findByUser_UserIdAndPaymentDateAfter(userId, cutoffDate);
-        return payments.stream().map(this::convertToDto).collect(Collectors.toList());
-    }
-
-    public List<PaymentDto> getAllPayments(Integer month, Integer year, Long userId) {
-        List<Payment> payments;
-        if (userId != null) {
-            payments = paymentRepository.findByUser_UserId(userId);
-        } else {
-            payments = paymentRepository.findAll();
-        }
-
-        return payments.stream().map(payment -> {
-            PaymentDto dto = new PaymentDto();
-            dto.setPaymentId(payment.getPaymentId().longValue());
-            dto.setUserId(payment.getUser().getUserId());
-            dto.setUserName(payment.getUser().getFullName());
-            dto.setPaymentType(payment.getType());
-            dto.setAmount(payment.getAmount());
-            dto.setStatus(payment.getStatus());
-            dto.setDate(payment.getDate());
-            dto.setPaymentDate(payment.getPaymentDate() != null ?
-                    payment.getPaymentDate().toLocalDate() : null);
-            return dto;
-        }).collect(Collectors.toList());
     }
 
     public PaymentResponse processPayment(PaymentRequest paymentRequest) throws StripeException {
