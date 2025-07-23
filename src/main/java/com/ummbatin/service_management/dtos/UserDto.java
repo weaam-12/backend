@@ -1,3 +1,4 @@
+// File: UserDto.java
 package com.ummbatin.service_management.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,6 +7,8 @@ import com.ummbatin.service_management.models.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "User data transfer object")
@@ -23,89 +26,72 @@ public class UserDto {
     @Schema(description = "User's phone number", example = "0501234567")
     private String phone;
 
-
     @Schema(description = "User's role", example = "ADMIN", allowableValues = {"USER", "ADMIN"})
     private Role role;
 
     @Schema(description = "User creation timestamp", example = "2025-06-01T10:57:25")
     private LocalDateTime createdAt;
 
+    @Schema(description = "List of user properties")
+    private List<PropertyDto> properties;
+
+    /* ────────────────────────────────
+       Constructors
+       ──────────────────────────────── */
     public UserDto() {}
 
     public UserDto(User user) {
-        this.user_id = user.getUserId();
-        this.fullName = user.getFullName();
-        this.email = user.getEmail();
-        this.phone = user.getPhone();
-        this.role = user.getRole();
+        this.user_id   = user.getUserId();
+        this.fullName  = user.getFullName();
+        this.email     = user.getEmail();
+        this.phone     = user.getPhone();
+        this.role      = user.getRole();
         this.createdAt = user.getCreatedAt();
+        this.properties = user.getProperties()
+                .stream()
+                .map(PropertyDto::new)
+                .collect(Collectors.toList());
     }
 
-    public UserDto(Long id, String fullName, String email, String phone,  Role role, LocalDateTime createdAt) {
-        this.user_id = id;
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.role = role;
-        this.createdAt = createdAt;
+    public UserDto(Long id, String fullName, String email, String phone,
+                   Role role, LocalDateTime createdAt, List<PropertyDto> properties) {
+        this.user_id    = id;
+        this.fullName   = fullName;
+        this.email      = email;
+        this.phone      = phone;
+        this.role       = role;
+        this.createdAt  = createdAt;
+        this.properties = properties;
     }
 
-    // Getters and Setters
+    /* ────────────────────────────────
+       Getters & Setters
+       ──────────────────────────────── */
+    public Long getUser_id() { return user_id; }
+    public void setId(Long user_id) { this.user_id = user_id; }
 
-    public Long getUser_id() {
-        return user_id;
-    }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setId(Long user_id) {
-        this.user_id = user_id;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getFullName() {
-        return fullName;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
-    public String getEmail() {
-        return email;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public List<PropertyDto> getProperties() { return properties; }
+    public void setProperties(List<PropertyDto> properties) { this.properties = properties; }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    // Optional Builder pattern
-
-    public static Builder builder() {
-        return new Builder();
-    }
+    /* ────────────────────────────────
+       Builder
+       ──────────────────────────────── */
+    public static Builder builder() { return new Builder(); }
 
     public static class Builder {
         private Long user_id;
@@ -114,40 +100,18 @@ public class UserDto {
         private String phone;
         private Role role;
         private LocalDateTime createdAt;
+        private List<PropertyDto> properties;
 
-        public Builder id(Long user_id) {
-            this.user_id = user_id;
-            return this;
-        }
-
-        public Builder fullName(String fullName) {
-            this.fullName = fullName;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder phone(String phone) {
-            this.phone = phone;
-            return this;
-        }
-
-
-        public Builder role(Role role) {
-            this.role = role;
-            return this;
-        }
-
-        public Builder createdAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
+        public Builder id(Long user_id) { this.user_id = user_id; return this; }
+        public Builder fullName(String fullName) { this.fullName = fullName; return this; }
+        public Builder email(String email) { this.email = email; return this; }
+        public Builder phone(String phone) { this.phone = phone; return this; }
+        public Builder role(Role role) { this.role = role; return this; }
+        public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
+        public Builder properties(List<PropertyDto> properties) { this.properties = properties; return this; }
 
         public UserDto build() {
-            return new UserDto(user_id, fullName, email, phone, role, createdAt);
+            return new UserDto(user_id, fullName, email, phone, role, createdAt, properties);
         }
     }
 }
