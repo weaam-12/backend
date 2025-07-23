@@ -52,6 +52,7 @@ public class Payment {
     @Column(name = "type")
     private String type;
 
+
     // Getters and Setters
     public Integer getPaymentId() {
         return paymentId;

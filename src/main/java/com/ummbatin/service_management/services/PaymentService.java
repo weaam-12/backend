@@ -105,8 +105,27 @@ public class PaymentService {
     }
 
     public ApiResponse generateArnonaBills(int month, int year, Long userId) {
-        // تنفيذ المنطق المطلوب لتوليد فواتير الأرنونا
-        return new ApiResponse(true, "Arnona bills generated successfully");
+        List<User> users = userId != null ? List.of(userRepository.findById(userId).orElseThrow()) : userRepository.findAll();
+
+        for (User user : users) {
+            for (Property property : user.getProperties()) {
+                double amount = property.getArea().doubleValue() * 3.0; // حساب الأرنونا بناءً على المساحة أو عدد الوحدات
+
+                Payment payment = new Payment();
+                payment.setUser(user);
+                payment.setProperty(property);
+                payment.setAmount(amount);
+                payment.setType("ARNONA");
+                payment.setStatus("PENDING");
+                payment.setDate(LocalDate.of(year, month, 1));
+                payment.setServiceId(1L); // مثلاً: خدمة الأرنونا
+                payment.setPaymentDate(LocalDateTime.now());
+
+                paymentRepository.save(payment); // ✅ هنا الحفظ
+            }
+        }
+
+        return new ApiResponse(true, "تم توليد فواتير الأرنونا بنجاح");
     }
 
     public ApiResponse updatePaymentFee(Long userId, String paymentType, double newAmount) {
