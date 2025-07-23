@@ -27,9 +27,8 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAllWithProperties();
     }
-
     public User registerUser(String email, String password, String roleName) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("User already exists");

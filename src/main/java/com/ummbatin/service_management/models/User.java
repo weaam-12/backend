@@ -31,7 +31,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String fullName;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Property> properties;
 
     @Column(nullable = false, unique = true)
@@ -48,6 +48,7 @@ public class User implements UserDetails {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
 
     // Automatically set createdAt before persisting to DB
     @PrePersist
