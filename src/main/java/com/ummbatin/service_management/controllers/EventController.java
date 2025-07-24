@@ -20,7 +20,7 @@ public class EventController {
     private final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
             "cloud_name" ,"dp4a2t3ln",
             "api_key", "621292534649539",
-            "api_secret", "YOUR_API_SECRET",
+            "api_secret", "X9RvH5Jl5JDXWbmaFC4AlBBrpkI",
             "secure",     true));
 
     private final EventService service;
