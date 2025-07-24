@@ -27,11 +27,16 @@ public class ComplaintController {
     public Complaint createComplaint(@RequestBody Complaint complaint) {
         return complaintService.createComplaint(complaint);
     }
+    @GetMapping("/resident/{userId}")
+    @PreAuthorize("hasRole('RESIDENT')")
+    public List<Complaint> getMyComplaints(@PathVariable Long userId) {
+        return complaintService.getComplaintsByUserId(userId);
+    }
 
     // Only Admin can update complaint status
-    @PutMapping("/{complaintId}/status")
+    @PutMapping("/{userId}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public Complaint updateComplaintStatus(@PathVariable Integer complaintId, @RequestParam String status) {
-        return complaintService.updateComplaintStatus(complaintId, status);
+    public Complaint updateComplaintStatus(@PathVariable Integer userId, @RequestParam String status) {
+        return complaintService.updateComplaintStatus(userId, status);
     }
 }
