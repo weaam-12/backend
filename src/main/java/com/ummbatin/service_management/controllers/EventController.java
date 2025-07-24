@@ -31,7 +31,7 @@ public class EventController {
 
         if (image != null && !image.isEmpty()) {
             // 1. حفظ الصورة داخل مجلد static/uploads
-            Path uploadDir = Paths.get("src/main/resources/static/uploads");
+            Path uploadDir = Paths.get("uploads").toAbsolutePath();
             if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir);
 
             String fileName = UUID.randomUUID() + "-" + image.getOriginalFilename();
