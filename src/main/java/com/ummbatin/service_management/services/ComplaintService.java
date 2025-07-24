@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class ComplaintService {
@@ -32,6 +34,13 @@ public class ComplaintService {
         if (complaint.getStatus() == null) {
             complaint.setStatus("SUBMITTED");
         }
+
+        // 👇 إنشاء رقم التذكرة
+        String ticket = "TKT-" + LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                + "-" + ThreadLocalRandom.current().nextInt(1000, 9999);
+        complaint.setTicketNumber(ticket);
+
         return complaintRepository.save(complaint);
     }
 
