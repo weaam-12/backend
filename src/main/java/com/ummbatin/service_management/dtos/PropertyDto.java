@@ -11,7 +11,13 @@ public class PropertyDto {
     private String address;
     private BigDecimal area;
     private int numberOfUnits;
-
+    public Property toEntity() {
+        Property p = new Property();
+        p.setAddress(this.address);
+        p.setArea(this.area);
+        p.setNumberOfUnits(this.numberOfUnits);
+        return p;
+    }
     public PropertyDto(Property property) {
         this.propertyId     = property.getPropertyId();
         this.address        = property.getAddress();
