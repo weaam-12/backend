@@ -2,35 +2,19 @@ package com.ummbatin.service_management.controllers;
 
 import com.ummbatin.service_management.models.Event;
 import com.ummbatin.service_management.services.EventService;
-import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
-    @SneakyThrows
-    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public Event create(
-            @RequestPart("event") Event event,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        if (image != null && !image.isEmpty()) {
-            // حفظ الصورة (مثلاً على S3 أو ديسك)
-            String fileName = UUID.randomUUID() + "-" + image.getOriginalFilename();
-            Path path = Paths.get("uploads/" + fileName);
-            Files.copy(image.getInputStream(), path);
-            event.setImageUrl(path.toString());
-        }
-        return service.create(event);
-    }
+
     private final EventService service;
     public EventController(EventService service) { this.service = service; }
 
@@ -40,8 +24,22 @@ public class EventController {
     @GetMapping("/{id}")
     public Event one(@PathVariable Long id) { return service.get(id); }
 
-    @PostMapping
-    public Event create(@RequestBody Event event) { return service.create(event); }
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public Event create(
+            @RequestPart("event") Event event,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+
+        if (image != null && !image.isEmpty()) {
+            Path uploadDir = Paths.get("uploads");
+            if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir);
+
+            String fileName = UUID.randomUUID() + "-" + image.getOriginalFilename();
+            Path filePath = uploadDir.resolve(fileName);
+            Files.copy(image.getInputStream(), filePath);
+            event.setImageUrl("/uploads/" + fileName);
+        }
+        return service.create(event);
+    }
 
     @PutMapping("/{id}")
     public Event update(@PathVariable Long id, @RequestBody Event event) {

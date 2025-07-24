@@ -9,30 +9,34 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_id")
     private Long id;
 
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(columnDefinition = "TEXT")
+
+    @Lob
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "start_date")
     private LocalDateTime startDate;
+
+    @Column(name = "end_date")
     private LocalDateTime endDate;
+
+    @Column(name = "location")
     private String location;
+
+    @Column(name = "organizer")
     private String organizer;
-    private Boolean isActive = true;
+
+    @Column(name = "is_active", columnDefinition = "TINYINT(1) default 1")
+    private Boolean active = true;
+
+    @Column(name = "image_url")
     private String imageUrl;
 
-    public Event(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
-    }
 
     public String getOrganizer() {
         return organizer;
@@ -88,6 +92,14 @@ public class Event {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     // Getters & Setters
