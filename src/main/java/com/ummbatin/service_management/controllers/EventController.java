@@ -40,13 +40,18 @@ public class EventController {
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
         if (image != null && !image.isEmpty()) {
-            // 2) رفع الصورة إلى Cloudinary
-            Map uploadResult = cloudinary.uploader()
-                    .upload(image.getBytes(), ObjectUtils.emptyMap());
-
-            // 3) استخراج الرابط الآمن المباشر
-            String imageUrl = (String) uploadResult.get("secure_url");
-            event.setImageUrl(imageUrl);
+            try {
+                System.out.println("Uploading to Cloudinary ...");
+                Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+                String imageUrl = (String) uploadResult.get("secure_url");
+                System.out.println("Uploaded URL = " + imageUrl);
+                event.setImageUrl(imageUrl);
+            } catch (Exception ex) {
+                ex.printStackTrace();  // سيطبع الخطأ في Log Render
+                throw new RuntimeException("Cloudinary error: " + ex.getMessage());
+            }
+        } else {
+            event.setImageUrl(null);  // تجنب قيمة null
         }
         return service.create(event);
     }
