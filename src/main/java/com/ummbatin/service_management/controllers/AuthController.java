@@ -4,6 +4,8 @@ import com.ummbatin.service_management.models.AuthenticationRequest;
 import com.ummbatin.service_management.models.AuthenticationResponse;
 import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.services.AuthenticationService;
+import com.ummbatin.service_management.dtos.FamilyRegistrationDto;
+import com.ummbatin.service_management.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
+    @Autowired
+    private UserService userService;
     @Autowired
     private AuthenticationService authService;
     @PostMapping("/register-family")
