@@ -1,21 +1,28 @@
-// File: UserDto.java
 package com.ummbatin.service_management.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.ummbatin.service_management.models.Role;
-import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.models.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "User data transfer object")
 public class UserDto {
 
     @Schema(description = "Unique identifier of the user", example = "1")
-    private Long user_id;
+    private Long id;
 
     @Schema(description = "User's full name", example = "Admin User")
     private String fullName;
@@ -35,83 +42,114 @@ public class UserDto {
     @Schema(description = "List of user properties")
     private List<PropertyDto> properties;
 
-    /* ────────────────────────────────
-       Constructors
-       ──────────────────────────────── */
-    public UserDto() {}
+    @Schema(description = "List of user's wives")
+    private List<WifeDto> wives;
 
-    public UserDto(User user) {
-        this.user_id   = user.getUserId();
-        this.fullName  = user.getFullName();
-        this.email     = user.getEmail();
-        this.phone     = user.getPhone();
-        this.role      = user.getRole();
-        this.createdAt = user.getCreatedAt();
-        this.properties = user.getProperties()
-                .stream()
-                .map(PropertyDto::new)
-                .collect(Collectors.toList());
+    @Schema(description = "List of user's children")
+    private List<ChildDto> children;
+
+    // Builder implementation
+    public static UserDtoBuilder builder() {
+        return new UserDtoBuilder();
     }
 
-    public UserDto(Long id, String fullName, String email, String phone,
-                   Role role, LocalDateTime createdAt, List<PropertyDto> properties) {
-        this.user_id    = id;
-        this.fullName   = fullName;
-        this.email      = email;
-        this.phone      = phone;
-        this.role       = role;
-        this.createdAt  = createdAt;
-        this.properties = properties;
-    }
-
-    /* ────────────────────────────────
-       Getters & Setters
-       ──────────────────────────────── */
-    public Long getUser_id() { return user_id; }
-    public void setId(Long user_id) { this.user_id = user_id; }
-
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public List<PropertyDto> getProperties() { return properties; }
-    public void setProperties(List<PropertyDto> properties) { this.properties = properties; }
-
-    /* ────────────────────────────────
-       Builder
-       ──────────────────────────────── */
-    public static Builder builder() { return new Builder(); }
-
-    public static class Builder {
-        private Long user_id;
+    public static class UserDtoBuilder {
+        private Long id;
         private String fullName;
         private String email;
         private String phone;
         private Role role;
         private LocalDateTime createdAt;
-        private List<PropertyDto> properties;
+        private List<PropertyDto> properties = Collections.emptyList();
+        private List<WifeDto> wives = Collections.emptyList();
+        private List<ChildDto> children = Collections.emptyList();
 
-        public Builder id(Long user_id) { this.user_id = user_id; return this; }
-        public Builder fullName(String fullName) { this.fullName = fullName; return this; }
-        public Builder email(String email) { this.email = email; return this; }
-        public Builder phone(String phone) { this.phone = phone; return this; }
-        public Builder role(Role role) { this.role = role; return this; }
-        public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
-        public Builder properties(List<PropertyDto> properties) { this.properties = properties; return this; }
+        public UserDtoBuilder user_id(Long user_id) {
+            this.id = user_id;
+            return this;
+        }
+
+        public UserDtoBuilder fullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public UserDtoBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public UserDtoBuilder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public UserDtoBuilder role(Role role) {
+            this.role = role;
+            return this;
+        }
+
+        public UserDtoBuilder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public UserDtoBuilder properties(List<PropertyDto> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public UserDtoBuilder wives(List<WifeDto> wives) {
+            this.wives = wives;
+            return this;
+        }
+
+        public UserDtoBuilder children(List<ChildDto> children) {
+            this.children = children;
+            return this;
+        }
 
         public UserDto build() {
-            return new UserDto(user_id, fullName, email, phone, role, createdAt, properties);
+            UserDto userDto = new UserDto();
+            userDto.setUser_id(this.id);
+            userDto.setFullName(this.fullName);
+            userDto.setEmail(this.email);
+            userDto.setPhone(this.phone);
+            userDto.setRole(this.role);
+            userDto.setCreatedAt(this.createdAt);
+            userDto.setProperties(this.properties);
+            userDto.setWives(this.wives);
+            userDto.setChildren(this.children);
+            return userDto;
         }
+    }
+    public UserDto(User user) {
+        this.id = user.getUserId();
+        this.fullName = user.getFullName();
+        this.email = user.getEmail();
+        this.phone = user.getPhone();
+        this.role = user.getRole();
+        this.createdAt = user.getCreatedAt();
+
+        this.properties = user.getProperties() != null ?
+                user.getProperties().stream()
+                        .map(Property::toDto)
+                        .collect(Collectors.toList()) :
+                Collections.emptyList();
+
+        this.wives = user.getWives() != null ?
+                user.getWives().stream()
+                        .map(Wife::toDto)
+                        .collect(Collectors.toList()) :
+                Collections.emptyList();
+
+        this.children = user.getChildren() != null ?
+                user.getChildren().stream()
+                        .map(Child::toDto)
+                        .collect(Collectors.toList()) :
+                Collections.emptyList();
+    }
+    private void setUser_id(Long id) {
+        this.id = id;
     }
 }

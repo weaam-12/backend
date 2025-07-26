@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.ummbatin.service_management.dtos.WifeDto;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,7 +16,12 @@ public class Wife {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
+    public WifeDto toDto() {
+        WifeDto dto = new WifeDto();
+        dto.setId(this.id);
+        dto.setName(this.name);
+        return dto;
+    }
     // Getters and Setters
     public Long getId() {
         return id;

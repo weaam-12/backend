@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.ummbatin.service_management.dtos.UserDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -96,5 +98,52 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Wife> wives;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Child> children;
+
+    // مع الجيتار والستار
+    public List<Wife> getWives() {
+        return wives;
+    }
+
+    public void setWives(List<Wife> wives) {
+        this.wives = wives;
+    }
+
+    public List<Child> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Child> children) {
+        this.children = children;
+    }
+    public UserDto toDto() {
+        return UserDto.builder()
+                .id(this.userId) // تغيير من user_id إلى id
+                .fullName(this.fullName)
+                .email(this.email)
+                .phone(this.phone)
+                .role(this.role)
+                .createdAt(this.createdAt)
+                .properties(this.properties != null ?
+                        this.properties.stream()
+                                .map(Property::toDto)
+                                .collect(Collectors.toList()) :
+                        Collections.emptyList())
+                .wives(this.wives != null ?
+                        this.wives.stream()
+                                .map(Wife::toDto)
+                                .collect(Collectors.toList()) :
+                        Collections.emptyList())
+                .children(this.children != null ?
+                        this.children.stream()
+                                .map(Child::toDto)
+                                .collect(Collectors.toList()) :
+                        Collections.emptyList())
+                .build();
     }
 }

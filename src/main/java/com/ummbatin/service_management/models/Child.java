@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.ummbatin.service_management.dtos.ChildDto;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -71,7 +72,13 @@ public class Child {
     public Kindergarten getKindergarten() {
         return kindergarten;
     }
-
+    public ChildDto toDto() {
+        ChildDto dto = new ChildDto();
+        dto.setChildId(this.childId);
+        dto.setName(this.name);
+        dto.setBirthDate(this.birthDate.toString());
+        return dto;
+    }
     public void setKindergarten(Kindergarten kindergarten) {
         this.kindergarten = kindergarten;
     }

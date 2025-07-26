@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.ummbatin.service_management.dtos.PropertyDto;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,7 +11,7 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "property_id")
-    private long propertyId;
+    private Long propertyId;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -31,12 +32,17 @@ public class Property {
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
     private List<Payment> payments;
 
+    // Convert to DTO
+    public PropertyDto toDto() {
+        return new PropertyDto(this);
+    }
+
     // Getters and Setters
     public Long getPropertyId() {
         return propertyId;
     }
 
-    public void setPropertyId(Integer propertyId) {
+    public void setPropertyId(Long propertyId) {
         this.propertyId = propertyId;
     }
 

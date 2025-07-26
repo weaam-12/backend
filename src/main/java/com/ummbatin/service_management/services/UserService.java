@@ -1,16 +1,12 @@
 package com.ummbatin.service_management.services;
 
 import com.ummbatin.service_management.dtos.FamilyRegistrationDto;
-import com.ummbatin.service_management.models.Child;
-import com.ummbatin.service_management.models.Role;
-import com.ummbatin.service_management.models.User;
-import com.ummbatin.service_management.models.Wife;
-import com.ummbatin.service_management.repositories.ChildRepository;
-import com.ummbatin.service_management.repositories.RoleRepository;
-import com.ummbatin.service_management.repositories.UserRepository;
-import com.ummbatin.service_management.repositories.WifeRepository;
+import com.ummbatin.service_management.models.*;
+import com.ummbatin.service_management.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +21,6 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private WifeRepository wifeRepository;
-
     @Autowired
     private ChildRepository childRepository;
     @Autowired
@@ -37,64 +32,63 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAllWithProperties();
-    }
-    public User registerUser(String email, String password, String roleName) {
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("User already exists");
-        }
-
-        Role role = roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole(role);
-
-        return userRepository.save(user);
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable); // أو استخدم findAllWithProperties إذا كنت تريد العلاقات
     }
 
     @Transactional
     public User registerFamily(FamilyRegistrationDto dto) {
-        // 1. create user
+        // 1. Create user
         User user = dto.getUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(
-                roleRepository.findByRoleName("USER")
-                        .orElseThrow(() -> new RuntimeException("Role USER not found"))
-        );
-        user = userRepository.save(user);
+        user.setRole(roleRepository.findByRoleName("USER")
+                .orElseThrow(() -> new RuntimeException("Role USER not found")));
 
-        // 2. wives
-        User finalUser = user;
-        List<Wife> wivesEntities = dto.getWives().stream()
+        User savedUser = userRepository.save(user);
+
+        // 2. Save wives
+        List<Wife> wives = dto.getWives().stream()
                 .filter(name -> name != null && !name.isBlank())
                 .map(name -> {
-                    Wife w = new Wife();
-                    w.setName(name);
-                    w.setUser(finalUser);
-                    return w;
+                    Wife wife = new Wife();
+                    wife.setName(name);
+                    wife.setUser(savedUser);
+                    return wife;
                 }).toList();
-        wifeRepository.saveAll(wivesEntities);
 
-        // 3. children
-        List<Wife> finalWives = wivesEntities;
+        List<Wife> savedWives = wifeRepository.saveAll(wives);
 
-        List<Child> childEntities = dto.getChildren().stream()
+        // 3. Save children
+        List<Child> children = dto.getChildren().stream()
                 .filter(c -> c.getName() != null && !c.getName().isBlank())
                 .map(c -> {
                     Child child = new Child();
                     child.setName(c.getName());
                     child.setBirthDate(LocalDate.parse(c.getBirthDate()));
-                    child.setUserId(finalUser.getUserId());
-                    Wife mother = finalWives.get(c.getWifeIndex());
-                    child.setWifeId(mother.getId());
+                    child.setUserId(savedUser.getUserId());
+                    child.setWifeId(savedWives.get(c.getWifeIndex()).getId());
                     return child;
                 }).toList();
-        childRepository.saveAll(childEntities);
 
-        return user;
+        childRepository.saveAll(children);
+
+        return savedUser;
+    }
+
+    @Transactional
+    public User updateUserRole(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = roleRepository.findByRoleName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
     }
 }
