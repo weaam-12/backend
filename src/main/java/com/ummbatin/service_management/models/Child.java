@@ -18,11 +18,13 @@ public class Child {
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
-    @Column(name = "wife_id", nullable = false)
-    private Long wifeId;
+    @ManyToOne
+    @JoinColumn(name = "wife_id", nullable = false)
+    private Wife wife;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "kindergarten_id")
@@ -53,24 +55,28 @@ public class Child {
         this.birthDate = birthDate;
     }
 
-    public Long getWifeId() {
-        return wifeId;
+    public Wife getWife() {
+        return wife;
     }
 
-    public void setWifeId(Long wifeId) {
-        this.wifeId = wifeId;
+    public void setWife(Wife wife) {
+        this.wife = wife;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Kindergarten getKindergarten() {
         return kindergarten;
+    }
+
+    public void setKindergarten(Kindergarten kindergarten) {
+        this.kindergarten = kindergarten;
     }
     public ChildDto toDto() {
         ChildDto dto = new ChildDto();
@@ -79,7 +85,12 @@ public class Child {
         dto.setBirthDate(this.birthDate.toString());
         return dto;
     }
-    public void setKindergarten(Kindergarten kindergarten) {
-        this.kindergarten = kindergarten;
+
+    public void setWifeId(Long wifeId) {
+        this.wife = new Wife();
+    }
+
+    public void setUserId(Long userId) {
+        this.user = new User();
     }
 }

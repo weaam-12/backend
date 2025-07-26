@@ -2,6 +2,7 @@ package com.ummbatin.service_management.repositories;
 
 import com.ummbatin.service_management.models.User;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,5 +17,9 @@ public interface UserRepository extends JpaRepository<User, Long> {  // Long mat
     List<User> findAllWithProperties();
     @Query("SELECT DISTINCT u FROM User u")
     Page<User> findAllUsers(Pageable pageable);
+
+
+    @EntityGraph(attributePaths = {"children", "wives", "properties"})
+    Page<User> findAll(Pageable pageable);
 
 }

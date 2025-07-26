@@ -3,6 +3,8 @@ package com.ummbatin.service_management.models;
 import com.ummbatin.service_management.dtos.WifeDto;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "wives")
 public class Wife {
@@ -16,12 +18,10 @@ public class Wife {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    public WifeDto toDto() {
-        WifeDto dto = new WifeDto();
-        dto.setId(this.id);
-        dto.setName(this.name);
-        return dto;
-    }
+
+    @OneToMany(mappedBy = "wife", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Child> children;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -46,4 +46,23 @@ public class Wife {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public List<Child> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Child> children) {
+        this.children = children;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User use;
+    public WifeDto toDto() {
+        WifeDto dto = new WifeDto();
+        dto.setId(this.id);
+        dto.setName(this.name);
+        return dto;
+    }
+    // Getters and Setters
 }

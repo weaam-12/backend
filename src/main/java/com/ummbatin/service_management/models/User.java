@@ -100,10 +100,10 @@ public class User implements UserDetails {
         return true;
     }
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Wife> wives;
+    private List<Child> children;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Child> children;
+    private List<Wife> wives;
 
     // مع الجيتار والستار
     public List<Wife> getWives() {
