@@ -20,7 +20,12 @@ public class AuthController {
 
     @Autowired
     private AuthenticationService authService;
-
+    @PostMapping("/register-family")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> registerFamily(@RequestBody FamilyRegistrationDto dto) {
+        User savedUser = userService.registerFamily(dto);
+        return ResponseEntity.ok(savedUser);
+    }
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
