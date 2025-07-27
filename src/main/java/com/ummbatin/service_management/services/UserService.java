@@ -39,8 +39,11 @@ public class UserService {
     @Transactional
     public User registerFamily(FamilyRegistrationDto dto) {
         // 1. Create user
-        User user = dto.getUser();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = new User();
+        user.setFullName(dto.getUser().getFullName());
+        user.setEmail(dto.getUser().getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getUser().getPassword()));
+        user.setPhone(dto.getUser().getPhone());
         user.setRole(roleRepository.findByRoleName("USER")
                 .orElseThrow(() -> new RuntimeException("Role USER not found")));
 
@@ -48,10 +51,10 @@ public class UserService {
 
         // 2. Save wives
         List<Wife> wives = dto.getWives().stream()
-                .filter(name -> name != null && !name.isBlank())
-                .map(name -> {
+                .filter(wifeDto -> wifeDto.getName() != null && !wifeDto.getName().isBlank())
+                .map(wifeDto -> {
                     Wife wife = new Wife();
-                    wife.setName(name);
+                    wife.setName(wifeDto.getName());
                     wife.setUser(savedUser);
                     return wife;
                 }).toList();
@@ -60,13 +63,13 @@ public class UserService {
 
         // 3. Save children
         List<Child> children = dto.getChildren().stream()
-                .filter(c -> c.getName() != null && !c.getName().isBlank())
-                .map(c -> {
+                .filter(childDto -> childDto.getName() != null && !childDto.getName().isBlank())
+                .map(childDto -> {
                     Child child = new Child();
-                    child.setName(c.getName());
-                    child.setBirthDate(LocalDate.parse(c.getBirthDate()));
-                    child.setUser(savedUser);                             // ✅
-                    child.setWife(savedWives.get(c.getWifeIndex()));
+                    child.setName(childDto.getName());
+                    child.setBirthDate(LocalDate.parse(childDto.getBirthDate()));
+                    child.setUser(savedUser);
+                    child.setWife(savedWives.get(childDto.getWifeIndex()));
                     return child;
                 }).toList();
 

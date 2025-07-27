@@ -28,10 +28,9 @@ public class AuthController {
 
     @PostMapping("/register-family")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> registerFamily(@RequestBody Map<String, Object> request) {
-        System.out.println("Received data: " + request); // للتصحيح
+    public ResponseEntity<?> registerFamily(@RequestBody FamilyRegistrationDto dto) {
         try {
-            User savedUser = userService.registerFamily(request);
+            User savedUser = userService.registerFamily(dto);
             return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

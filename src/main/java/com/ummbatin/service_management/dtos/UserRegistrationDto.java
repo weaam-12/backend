@@ -17,7 +17,6 @@ public class UserRegistrationDto {
     private String role;
 
 
-    public UserRegistrationDto() {}
 
     public UserRegistrationDto(String email, String password, String role) {
         this.email = email;
