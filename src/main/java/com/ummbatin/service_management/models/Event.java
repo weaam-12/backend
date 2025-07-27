@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id")
+    @JsonProperty("id")
     private Long id;
 
     @Column(name = "title", nullable = false)
@@ -100,6 +102,14 @@ public class Event {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     // Getters & Setters
