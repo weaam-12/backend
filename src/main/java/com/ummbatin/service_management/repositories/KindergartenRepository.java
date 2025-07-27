@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface KindergartenRepository extends JpaRepository<Kindergarten, Integer> {
-    @EntityGraph(attributePaths = {"children"})
+    @EntityGraph(attributePaths = {"children", "enrollments"})
     List<Kindergarten> findAll();
 }

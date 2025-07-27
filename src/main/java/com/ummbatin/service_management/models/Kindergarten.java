@@ -27,10 +27,19 @@ public class Kindergarten {
     private String status = "OPEN";
     @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
+
     @Transient
     public Integer getChildrenCount() {
         return children != null ? children.size() : 0;
     }
+
+    @Transient
+    public Integer getPendingRequests() {
+        return enrollments != null ?
+                (int) enrollments.stream().filter(e -> "PENDING".equals(e.getStatus())).count() : 0;
+    }
+
+
     // Getters and Setters
     public Integer getKindergartenId() {
         return kindergartenId;

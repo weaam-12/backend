@@ -2,24 +2,31 @@ package com.ummbatin.service_management.controllers;
 
 import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.repositories.KindergartenRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/kindergartens")
 public class KindergartenController {
+    private static final Logger log = LoggerFactory.getLogger(KindergartenController.class);
 
     @Autowired
     private KindergartenRepository kindergartenRepository;
 
     @GetMapping
     public List<Kindergarten> getAllKindergartens() {
-        return kindergartenRepository.findAll();
+        log.info("Fetching all kindergartens with children");
+        List<Kindergarten> kgs = kindergartenRepository.findAll();
+        log.info("Found {} kindergartens", kgs.size());
+        kgs.forEach(kg -> log.info("Kindergarten {} has {} children", kg.getName(), kg.getChildren().size()));
+        return kgs;
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<Kindergarten> getKindergartenById(@PathVariable Integer id) {
         return kindergartenRepository.findById(id)
