@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -23,11 +25,17 @@ public class AuthController {
     private UserService userService;
     @Autowired
     private AuthenticationService authService;
+
     @PostMapping("/register-family")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> registerFamily(@RequestBody FamilyRegistrationDto dto) {
-        User savedUser = userService.registerFamily(dto);
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<?> registerFamily(@RequestBody Map<String, Object> request) {
+        System.out.println("Received data: " + request); // للتصحيح
+        try {
+            User savedUser = userService.registerFamily(request);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/register")
