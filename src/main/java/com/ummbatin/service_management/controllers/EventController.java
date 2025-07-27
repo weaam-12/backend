@@ -66,4 +66,28 @@ public class EventController {
         service.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/image")
+    public Event changeImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile image) throws IOException {
+        Event event = service.get(id);
+
+        if (image != null && !image.isEmpty()) {
+            Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+            String imageUrl = (String) uploadResult.get("secure_url");
+            event.setImageUrl(imageUrl);
+        } else {
+            event.setImageUrl(null);
+        }
+
+        return service.update(id, event);
+    }
+
+    @DeleteMapping("/{id}/image")
+    public Event removeImage(@PathVariable Long id) {
+        Event event = service.get(id);
+        event.setImageUrl(null);
+        return service.update(id, event);
+    }
 }
