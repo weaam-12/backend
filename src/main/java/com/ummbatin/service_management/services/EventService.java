@@ -26,5 +26,6 @@ public class EventService {
         existing.setImageUrl(e.getImageUrl());
         return repo.save(existing);
     }
+
     public void delete(Long id) { repo.deleteById(id); }
 }

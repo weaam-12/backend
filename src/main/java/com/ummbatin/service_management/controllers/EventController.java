@@ -24,15 +24,22 @@ public class EventController {
             "secure",     true));
 
     private final EventService service;
-    public EventController(EventService service) { this.service = service; }
+
+    public EventController(EventService service) {
+        this.service = service;
+    }
 
     /* ---------- REST endpoints ---------- */
 
     @GetMapping
-    public List<Event> all() { return service.getAll(); }
+    public List<Event> all() {
+        return service.getAll();
+    }
 
     @GetMapping("/{id}")
-    public Event one(@PathVariable Long id) { return service.get(id); }
+    public Event one(@PathVariable Long id) {
+        return service.get(id);
+    }
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public Event create(
@@ -58,6 +65,7 @@ public class EventController {
 
     @PutMapping("/{id}")
     public Event update(@PathVariable Long id, @RequestBody Event event) {
+        System.out.println("Updating event with ID: " + id);
         return service.update(id, event);
     }
 
