@@ -12,14 +12,4 @@ public class FamilyRegistrationDto {
     private List<ChildRegistrationDto> children;
 }
 
-@Data
-class WifeRegistrationDto {
-    private String name;
-}
 
-@Data
-class ChildRegistrationDto {
-    private String name;
-    private String birthDate;
-    private int wifeIndex; // تغيير من motherName إلى wifeIndex
-}

@@ -4,6 +4,8 @@ import com.ummbatin.service_management.dtos.FamilyRegistrationDto;
 import com.ummbatin.service_management.models.*;
 import com.ummbatin.service_management.repositories.*;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +18,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -45,12 +47,12 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getUser().getPassword()));
         user.setPhone(dto.getUser().getPhone());
 
-        // تغيير هنا: البحث باسم الدور بدلاً من ID
         Role userRole = roleRepository.findByRoleName("RESIDENT")
                 .orElseThrow(() -> new RuntimeException("Role RESIDENT not found"));
         user.setRole(userRole);
 
         User savedUser = userRepository.save(user);
+        log.info("User saved with ID: {}", savedUser.getUserId());
 
         // 2. حفظ الزوجات
         List<Wife> wives = dto.getWives().stream()
@@ -63,6 +65,7 @@ public class UserService {
                 }).toList();
 
         List<Wife> savedWives = wifeRepository.saveAll(wives);
+        log.info("Wives saved: {}", savedWives.size());
 
         // 3. حفظ الأبناء
         List<Child> children = dto.getChildren().stream()
@@ -73,8 +76,7 @@ public class UserService {
                     child.setBirthDate(LocalDate.parse(childDto.getBirthDate()));
                     child.setUser(savedUser);
 
-                    // البحث عن الزوجة باستخدام الفهرس مباشرة
-                    if(childDto.getWifeIndex() >= 0 && childDto.getWifeIndex() < savedWives.size()) {
+                    if (childDto.getWifeIndex() >= 0 && childDto.getWifeIndex() < savedWives.size()) {
                         child.setWife(savedWives.get(childDto.getWifeIndex()));
                     } else {
                         throw new RuntimeException("Invalid wife index");
@@ -83,6 +85,7 @@ public class UserService {
                 }).toList();
 
         childRepository.saveAll(children);
+        log.info("Children saved: {}", children.size());
 
         return savedUser;
     }

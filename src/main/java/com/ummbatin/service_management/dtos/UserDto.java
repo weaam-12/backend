@@ -48,6 +48,9 @@ public class UserDto {
     @Schema(description = "List of user's children")
     private List<ChildDto> children;
 
+    @Schema(description = "User's password")
+    private String password; // Add this field
+
     public static UserDtoBuilder builder() {
         return new UserDtoBuilder();
     }
@@ -62,6 +65,7 @@ public class UserDto {
         private List<PropertyDto> properties = Collections.emptyList();
         private List<WifeDto> wives = Collections.emptyList();
         private List<ChildDto> children = Collections.emptyList();
+        private String password; // Add this field in the builder
 
         public UserDtoBuilder user_id(Long user_id) {
             this.id = user_id;
@@ -108,6 +112,11 @@ public class UserDto {
             return this;
         }
 
+        public UserDtoBuilder password(String password) { // Add this method in the builder
+            this.password = password;
+            return this;
+        }
+
         public UserDto build() {
             UserDto userDto = new UserDto();
             userDto.setUser_id(this.id);
@@ -119,6 +128,7 @@ public class UserDto {
             userDto.setProperties(this.properties);
             userDto.setWives(this.wives);
             userDto.setChildren(this.children);
+            userDto.setPassword(this.password); // Set the password
             return userDto;
         }
     }
@@ -148,6 +158,7 @@ public class UserDto {
                         .map(Child::toDto)
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
+        this.password = user.getPassword(); // Set the password
     }
 
     private void setUser_id(Long id) {
