@@ -23,10 +23,14 @@ public class Kindergarten {
 
     @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
     private List<Child> children;
-
+    @Column(name = "status")
+    private String status = "OPEN";
     @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
-
+    @Transient
+    public Integer getChildrenCount() {
+        return children != null ? children.size() : 0;
+    }
     // Getters and Setters
     public Integer getKindergartenId() {
         return kindergartenId;

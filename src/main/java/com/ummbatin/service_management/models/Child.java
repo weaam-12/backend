@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ummbatin.service_management.dtos.ChildDto;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -16,7 +17,11 @@ import java.time.LocalDate;
         @Column(name = "name", nullable = false)
         private String name;
 
+        @Column(name = "monthly_fee")
+        private Double monthlyFee;
+
         @Column(name = "birth_date", nullable = false)
+        @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate birthDate;
 
         @ManyToOne
