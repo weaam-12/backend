@@ -1,6 +1,8 @@
 package com.ummbatin.service_management.models;
 
 import com.ummbatin.service_management.dtos.WifeDto;
+import com.ummbatin.service_management.models.Child;
+import com.ummbatin.service_management.models.User;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -55,14 +57,10 @@ public class Wife {
         this.children = children;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User use;
     public WifeDto toDto() {
         WifeDto dto = new WifeDto();
         dto.setId(this.id);
         dto.setName(this.name);
         return dto;
     }
-    // Getters and Setters
 }

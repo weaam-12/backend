@@ -65,8 +65,8 @@ public class UserService {
                     Child child = new Child();
                     child.setName(c.getName());
                     child.setBirthDate(LocalDate.parse(c.getBirthDate()));
-                    child.setUserId(savedUser.getUserId());
-                    child.setWifeId(savedWives.get(c.getWifeIndex()).getId());
+                    child.setUser(savedUser);                             // ✅
+                    child.setWife(savedWives.get(c.getWifeIndex()));
                     return child;
                 }).toList();
 

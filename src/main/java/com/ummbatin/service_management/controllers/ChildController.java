@@ -34,8 +34,7 @@ public class ChildController {
         Child child = new Child();
         child.setName(childDTO.getName());
         child.setBirthDate(childDTO.getBirthDate());
-        child.setWifeId(childDTO.getWifeId());
-        child.setUserId(childDTO.getUserId());
+
 
         if(childDTO.getKindergartenId() != null) {
             Kindergarten kindergarten = new Kindergarten();
