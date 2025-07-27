@@ -13,7 +13,7 @@ public class ChildService {
     private ChildRepository childRepository;
 
     public List<Child> getChildrenByUserId(Long userId) {
-        return childRepository.findByUserId(userId);
+        return childRepository.findByUser_UserId(userId);
     }
 
     public List<Child> getChildrenByWifeId(Long wifeId) {
