@@ -7,11 +7,10 @@ import java.util.List;
 
 @Data
 public class FamilyRegistrationDto {
-    private User user;
-    private List<WifeDto> wives;        // just names
-    private List<ChildDto> children;// nested
+    private UserDto user;
+    private List<WifeRegistrationDto> wives;
+    private List<ChildRegistrationDto> children;
 }
-
 
 @Data
 class WifeRegistrationDto {
@@ -22,5 +21,5 @@ class WifeRegistrationDto {
 class ChildRegistrationDto {
     private String name;
     private String birthDate;
-    private String motherName;
+    private int wifeIndex; // تغيير من motherName إلى wifeIndex
 }

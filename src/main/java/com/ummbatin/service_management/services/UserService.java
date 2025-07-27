@@ -38,19 +38,21 @@ public class UserService {
 
     @Transactional
     public User registerFamily(FamilyRegistrationDto dto) {
-        // 1. Create user
+        // 1. إنشاء المستخدم
         User user = new User();
         user.setFullName(dto.getUser().getFullName());
         user.setEmail(dto.getUser().getEmail());
         user.setPassword(passwordEncoder.encode(dto.getUser().getPassword()));
         user.setPhone(dto.getUser().getPhone());
-        Role userRole = roleRepository.findById(2L)
-                .orElseThrow(() -> new RuntimeException("Role with ID 2 not found"));
+
+        // تغيير هنا: البحث باسم الدور بدلاً من ID
+        Role userRole = roleRepository.findByRoleName("RESIDENT")
+                .orElseThrow(() -> new RuntimeException("Role RESIDENT not found"));
         user.setRole(userRole);
 
         User savedUser = userRepository.save(user);
 
-        // 2. Save wives
+        // 2. حفظ الزوجات
         List<Wife> wives = dto.getWives().stream()
                 .filter(wifeDto -> wifeDto.getName() != null && !wifeDto.getName().isBlank())
                 .map(wifeDto -> {
@@ -62,7 +64,7 @@ public class UserService {
 
         List<Wife> savedWives = wifeRepository.saveAll(wives);
 
-        // 3. Save children
+        // 3. حفظ الأبناء
         List<Child> children = dto.getChildren().stream()
                 .filter(childDto -> childDto.getName() != null && !childDto.getName().isBlank())
                 .map(childDto -> {
@@ -71,13 +73,12 @@ public class UserService {
                     child.setBirthDate(LocalDate.parse(childDto.getBirthDate()));
                     child.setUser(savedUser);
 
-                    // البحث عن الزوجة باستخدام motherName
-                    Wife mother = savedWives.stream()
-                            .filter(w -> w.getName().equals(childDto.getMotherName()))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Mother not found"));
-
-                    child.setWife(mother);
+                    // البحث عن الزوجة باستخدام الفهرس مباشرة
+                    if(childDto.getWifeIndex() >= 0 && childDto.getWifeIndex() < savedWives.size()) {
+                        child.setWife(savedWives.get(childDto.getWifeIndex()));
+                    } else {
+                        throw new RuntimeException("Invalid wife index");
+                    }
                     return child;
                 }).toList();
 
