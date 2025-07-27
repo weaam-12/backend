@@ -69,7 +69,14 @@ public class UserService {
                     child.setName(childDto.getName());
                     child.setBirthDate(LocalDate.parse(childDto.getBirthDate()));
                     child.setUser(savedUser);
-                    child.setWife(savedWives.get(childDto.getWifeIndex()));
+
+                    // البحث عن الزوجة باستخدام motherName
+                    Wife mother = savedWives.stream()
+                            .filter(w -> w.getName().equals(childDto.getMotherName()))
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("Mother not found"));
+
+                    child.setWife(mother);
                     return child;
                 }).toList();
 

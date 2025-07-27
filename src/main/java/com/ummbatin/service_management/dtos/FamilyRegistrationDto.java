@@ -22,5 +22,5 @@ class WifeRegistrationDto {
 class ChildRegistrationDto {
     private String name;
     private String birthDate;
-    private int wifeIndex;
+    private String motherName;
 }

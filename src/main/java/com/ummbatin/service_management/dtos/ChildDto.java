@@ -6,6 +6,10 @@ public class ChildDto {
     private Integer childId;
     private String name;
     private String birthDate;
-    private int wifeIndex;
+    private String MotherName ;
+
+    public String getMotherName() {
+        return MotherName;
+    }
 }
 
