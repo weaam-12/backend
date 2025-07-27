@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,8 +50,12 @@ public class User implements UserDetails {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Child> children;
 
-    // Automatically set createdAt before persisting to DB
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Wife> wives;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -60,21 +63,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(
-                new SimpleGrantedAuthority(role.getRoleName().toUpperCase())
-        );
-    }
-    @Column(name = "last_water_reading")
-    private Double lastWaterReading;
-
-    // مع الجيتار والستار
-    public Double getLastWaterReading() {
-        return lastWaterReading;
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getRoleName().toUpperCase()));
     }
 
-    public void setLastWaterReading(Double lastWaterReading) {
-        this.lastWaterReading = lastWaterReading;
-    }
     @Override
     public String getUsername() {
         return email;
@@ -100,29 +91,6 @@ public class User implements UserDetails {
         return true;
     }
 
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Child> children;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Wife> wives;
-
-    // مع الجيتار والستار
-    public List<Wife> getWives() {
-        return wives;
-    }
-
-    public void setWives(List<Wife> wives) {
-        this.wives = wives;
-    }
-
-    public List<Child> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<Child> children) {
-        this.children = children;
-    }
     public UserDto toDto() {
         return UserDto.builder()
                 .id(this.userId)

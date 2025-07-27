@@ -48,7 +48,6 @@ public class UserDto {
     @Schema(description = "List of user's children")
     private List<ChildDto> children;
 
-    // Builder implementation
     public static UserDtoBuilder builder() {
         return new UserDtoBuilder();
     }
@@ -123,6 +122,7 @@ public class UserDto {
             return userDto;
         }
     }
+
     public UserDto(User user) {
         this.id = user.getUserId();
         this.fullName = user.getFullName();
@@ -149,6 +149,7 @@ public class UserDto {
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
+
     private void setUser_id(Long id) {
         this.id = id;
     }

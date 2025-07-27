@@ -18,8 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {  // Long mat
     @Query("SELECT DISTINCT u FROM User u")
     Page<User> findAllUsers(Pageable pageable);
 
-
-    @EntityGraph(attributePaths = {"children", "wives", "properties"})
     Page<User> findAll(Pageable pageable);
+
+
 
 }
