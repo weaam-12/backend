@@ -63,9 +63,17 @@ public class EventController {
         return service.create(event);
     }
 
-    @PutMapping("/{id}")
-    public Event update(@PathVariable Long id, @RequestBody Event event) {
-        System.out.println("Updating event with ID: " + id);
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public Event update(
+            @PathVariable Long id,
+            @RequestPart("event") Event event,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+
+        if (image != null && !image.isEmpty()) {
+            Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+            String imageUrl = (String) uploadResult.get("secure_url");
+            event.setImageUrl(imageUrl);
+        }
         return service.update(id, event);
     }
 
