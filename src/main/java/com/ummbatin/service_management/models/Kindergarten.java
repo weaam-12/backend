@@ -1,7 +1,10 @@
 package com.ummbatin.service_management.models;
 
 import jakarta.persistence.*;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "kindergartens")
@@ -21,12 +24,6 @@ public class Kindergarten {
     @Column(name = "location", nullable = false)
     private String location;
 
-    @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
-    private List<Child> children;
-    @Column(name = "status")
-    private String status = "OPEN";
-    @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
-    private List<Enrollment> enrollments;
 
     @Transient
     public Integer getChildrenCount() {
@@ -38,7 +35,11 @@ public class Kindergarten {
         return enrollments != null ?
                 (int) enrollments.stream().filter(e -> "PENDING".equals(e.getStatus())).count() : 0;
     }
+    @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
+    private Set<Child> children = new HashSet<>();
 
+    @OneToMany(mappedBy = "kindergarten", cascade = CascadeType.ALL)
+    private Set<Enrollment> enrollments = new HashSet<>();
 
     // Getters and Setters
     public Integer getKindergartenId() {
@@ -73,19 +74,19 @@ public class Kindergarten {
         this.location = location;
     }
 
-    public List<Child> getChildren() {
+    public Set<Child> getChildren() {
         return children;
     }
 
-    public void setChildren(List<Child> children) {
+    public void setChildren(Set<Child> children) {
         this.children = children;
     }
 
-    public List<Enrollment> getEnrollments() {
+    public Set<Enrollment> getEnrollments() {
         return enrollments;
     }
 
-    public void setEnrollments(List<Enrollment> enrollments) {
+    public void setEnrollments(Set<Enrollment> enrollments) {
         this.enrollments = enrollments;
     }
 }
