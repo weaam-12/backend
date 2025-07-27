@@ -99,10 +99,12 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Child> children;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Wife> wives;
 
     // مع الجيتار والستار
@@ -123,7 +125,7 @@ public class User implements UserDetails {
     }
     public UserDto toDto() {
         return UserDto.builder()
-                .id(this.userId) // تغيير من user_id إلى id
+                .id(this.userId)
                 .fullName(this.fullName)
                 .email(this.email)
                 .phone(this.phone)

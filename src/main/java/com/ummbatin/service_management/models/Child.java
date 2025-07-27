@@ -84,8 +84,7 @@ import java.time.LocalDate;
             ChildDto dto = new ChildDto();
             dto.setChildId(this.childId);
             dto.setName(this.name);
-            dto.setBirthDate(this.birthDate.toString()); // أو أي صيغة تحتاجها
-            // wifeIndex لا يُحسب هنا لأنه معتمد على ترتيب القائمة
+            dto.setBirthDate(this.birthDate.toString());
             return dto;
         }
     }
