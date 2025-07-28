@@ -1,7 +1,9 @@
 package com.ummbatin.service_management.controllers;
 
+import com.ummbatin.service_management.dtos.KindergartenDto;
 import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.repositories.KindergartenRepository;
+import com.ummbatin.service_management.services.KindergartenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,14 @@ public class KindergartenController {
     @Autowired
     private KindergartenRepository kindergartenRepository;
 
+
+    @Autowired
+    private KindergartenService kindergartenService;
+
     @GetMapping
-    public List<Kindergarten> getAllKindergartens() {
+    public List<KindergartenDto> getAllKindergartens() {
         log.info("Fetching all kindergartens with children");
-        List<Kindergarten> kgs = kindergartenRepository.findAll();
+        List<KindergartenDto> kgs = kindergartenService.getAllKindergartens();
         log.info("Found {} kindergartens", kgs.size());
         kgs.forEach(kg -> log.info("Kindergarten {} has {} children", kg.getName(), kg.getChildren().size()));
         return kgs;

@@ -1,12 +1,17 @@
 package com.ummbatin.service_management.services;
 
+import com.ummbatin.service_management.dtos.ChildDto;
+import com.ummbatin.service_management.dtos.KindergartenDto;
+import com.ummbatin.service_management.dtos.UserDto;
+import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Kindergarten;
+import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.repositories.KindergartenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class KindergartenService {
@@ -18,28 +23,39 @@ public class KindergartenService {
         this.kindergartenRepository = kindergartenRepository;
     }
 
-    public List<Kindergarten> getAllKindergartens() {
-        return kindergartenRepository.findAll();
+    public List<KindergartenDto> getAllKindergartens() {
+        return kindergartenRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Kindergarten> getKindergartenById(Integer id) {
-        return kindergartenRepository.findById(id);
+    private KindergartenDto convertToDto(Kindergarten kindergarten) {
+        KindergartenDto dto = new KindergartenDto();
+        dto.setKindergartenId(kindergarten.getKindergartenId());
+        dto.setName(kindergarten.getName());
+        dto.setCapacity(kindergarten.getCapacity());
+        dto.setLocation(kindergarten.getLocation());
+        dto.setChildren(kindergarten.getChildren().stream()
+                .map(this::convertChildToDto)
+                .collect(Collectors.toList()));
+        return dto;
     }
 
-    public Kindergarten createKindergarten(Kindergarten kindergarten) {
-        return kindergartenRepository.save(kindergarten);
+    private ChildDto convertChildToDto(Child child) {
+        ChildDto dto = new ChildDto();
+        dto.setChildId(child.getChildId());
+        dto.setName(child.getName());
+        dto.setBirthDate(child.getBirthDate().toString());
+        dto.setUser(convertUserToDto(child.getUser()));
+        return dto;
     }
 
-    public Kindergarten updateKindergarten(Integer id, Kindergarten updatedKindergarten) {
-        return kindergartenRepository.findById(id).map(existing -> {
-            existing.setName(updatedKindergarten.getName());
-            existing.setCapacity(updatedKindergarten.getCapacity());
-            existing.setLocation(updatedKindergarten.getLocation());
-            return kindergartenRepository.save(existing);
-        }).orElseThrow(() -> new IllegalArgumentException("Kindergarten not found with ID: " + id));
-    }
-
-    public void deleteKindergarten(Integer id) {
-        kindergartenRepository.deleteById(id);
+    private UserDto convertUserToDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setUserId(user.getUserId());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        return dto;
     }
 }

@@ -55,6 +55,10 @@ public class UserDto {
         return new UserDtoBuilder();
     }
 
+    public void setUserId(Long userId) {
+        this.id = userId;
+    }
+
     public static class UserDtoBuilder {
         private Long id;
         private String fullName;
