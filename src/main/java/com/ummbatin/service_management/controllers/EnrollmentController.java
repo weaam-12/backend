@@ -5,7 +5,10 @@ import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Enrollment;
 import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.services.EnrollmentService;
+import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +27,7 @@ public class EnrollmentController {
         return enrollmentService.getChildEnrollments(childId);
     }
 
-    // Resident can enroll their child
-    @PostMapping
-    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN')")
-    public Enrollment enrollChild(@RequestBody Enrollment enrollment) {
-        return enrollmentService.enrollChild(enrollment);
-    }
+
 
     // Resident can cancel their child's enrollment
     @DeleteMapping("/{id}")
@@ -47,19 +45,32 @@ public class EnrollmentController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN')")
-    public Enrollment enrollChild(@RequestBody EnrollmentRequestDTO enrollmentDTO) {
-        Enrollment enrollment = new Enrollment();
+    public ResponseEntity<?> enrollChild(@RequestBody EnrollmentRequestDTO enrollmentDTO) {
+        try {
+            Enrollment enrollment = new Enrollment();
 
-        Child child = new Child();
-        child.setChildId(enrollmentDTO.getChildId().intValue());
-        enrollment.setChild(child);
+            // تعيين الطفل
+            Child child = new Child();
+            child.setChildId(enrollmentDTO.getChildId().intValue());
+            enrollment.setChild(child);
 
-        Kindergarten kindergarten = new Kindergarten();
-        kindergarten.setKindergartenId(enrollmentDTO.getKindergartenId());
-        enrollment.setKindergarten(kindergarten);
+            // تعيين الحضانة
+            Kindergarten kindergarten = new Kindergarten();
+            kindergarten.setKindergartenId(enrollmentDTO.getKindergartenId());
+            enrollment.setKindergarten(kindergarten);
 
-        enrollment.setStatus(enrollmentDTO.getStatus());
+            // تعيين الحقول الإضافية
+            enrollment.setStatus(enrollmentDTO.getStatus() != null ? enrollmentDTO.getStatus() : "PENDING");
+            enrollment.setPaymentIntentId(enrollmentDTO.getPaymentIntentId());
 
-        return enrollmentService.enrollChild(enrollment);
+            // حفظ التسجيل
+            Enrollment savedEnrollment = enrollmentService.enrollChild(enrollment);
+
+            return ResponseEntity.ok(savedEnrollment);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "Error creating enrollment: " + e.getMessage()));
+        }
     }
 }
