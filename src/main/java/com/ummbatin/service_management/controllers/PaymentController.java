@@ -3,9 +3,13 @@ package com.ummbatin.service_management.controllers;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.ummbatin.service_management.dtos.*;
+import com.ummbatin.service_management.models.Enrollment;
 import com.ummbatin.service_management.models.Payment;
+import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
+import com.ummbatin.service_management.services.StripeService;
 import com.ummbatin.service_management.utils.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,12 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
+
+    @Autowired
+    private StripeService stripeService;
+
+    @Autowired
+    private EnrollmentService enrollmentService;
 
     @GetMapping("/all")
     public ResponseEntity<List<PaymentDto>> getAllPayments(
@@ -190,5 +200,33 @@ public class PaymentController {
                     .body(new ApiResponse(false, "Failed to generate custom water payments: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/create-kindergarten")
+    public String createKindergartenPayment(
+            @RequestParam Long childId,
+            @RequestParam Integer kindergartenId,
+            @RequestParam Long amount) throws Exception {
+
+        // 1. إنشاء PaymentIntent مع Stripe
+        PaymentIntent intent = stripeService.createPaymentIntent(amount);
+
+        // 2. حفظ معلومات التسجيل مؤقتًا (يمكن استخدام Redis أو جدول مؤقت)
+        // enrollmentService.saveTemporaryEnrollment(childId, kindergartenId, intent.getId());
+
+        return intent.getClientSecret();
+    }
+
+    @PostMapping("/confirm-kindergarten")
+    public String confirmKindergartenPayment(
+            @RequestParam String paymentIntentId) {
+
+        // 1. التحقق من نجاح الدفع مع Stripe
+        // 2. إذا نجح الدفع، إنشاء التسجيل النهائي
+        Enrollment enrollment = enrollmentService.createFinalEnrollment(paymentIntentId);
+
+        return "Payment confirmed and enrollment created with ID: " + enrollment.getId();
+    }
+
+
 
 }
