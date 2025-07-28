@@ -7,6 +7,7 @@ import com.ummbatin.service_management.repositories.KindergartenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -53,6 +54,15 @@ public class EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
         enrollment.setStatus(newStatus);
+        return enrollmentRepository.save(enrollment);
+    }
+
+    public Enrollment createFinalEnrollment(String paymentIntentId) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setStatus("PENDING"); // أو "APPROVED" حسب متطلباتك
+        enrollment.setPaymentIntentId(paymentIntentId);
+
+        // 4. حفظ التسجيل في قاعدة البيانات
         return enrollmentRepository.save(enrollment);
     }
 }

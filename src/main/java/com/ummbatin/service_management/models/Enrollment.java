@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "enrollments")
 public class Enrollment {
@@ -55,6 +57,9 @@ public class Enrollment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setPaymentIntentId(String paymentIntentId) {
     }
 
 }
