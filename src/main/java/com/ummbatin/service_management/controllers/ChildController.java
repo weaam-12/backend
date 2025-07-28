@@ -3,6 +3,7 @@ package com.ummbatin.service_management.controllers;
 import com.ummbatin.service_management.dtos.ChildRequestDTO;
 import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Kindergarten;
+import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.services.ChildService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,9 @@ public class ChildController {
         child.setName(childDTO.getName());
         child.setBirthDate(childDTO.getBirthDate());
 
+        User user = new User();
+        user.setUserId(childDTO.getUserId());
+        child.setUser(user);
 
         if(childDTO.getKindergartenId() != null) {
             Kindergarten kindergarten = new Kindergarten();

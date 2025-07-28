@@ -1,6 +1,9 @@
 package com.ummbatin.service_management.controllers;
 
+import com.ummbatin.service_management.dtos.EnrollmentRequestDTO;
+import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Enrollment;
+import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.services.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,5 +43,23 @@ public class EnrollmentController {
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN')")
     public Enrollment updateEnrollmentStatus(@PathVariable Long id, @RequestBody String newStatus) {
         return enrollmentService.updateEnrollmentStatus(id, newStatus);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN')")
+    public Enrollment enrollChild(@RequestBody EnrollmentRequestDTO enrollmentDTO) {
+        Enrollment enrollment = new Enrollment();
+
+        Child child = new Child();
+        child.setChildId(enrollmentDTO.getChildId().intValue());
+        enrollment.setChild(child);
+
+        Kindergarten kindergarten = new Kindergarten();
+        kindergarten.setKindergartenId(enrollmentDTO.getKindergartenId());
+        enrollment.setKindergarten(kindergarten);
+
+        enrollment.setStatus(enrollmentDTO.getStatus());
+
+        return enrollmentService.enrollChild(enrollment);
     }
 }

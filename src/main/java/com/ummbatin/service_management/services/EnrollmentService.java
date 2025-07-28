@@ -28,7 +28,9 @@ public class EnrollmentService {
     public List<Enrollment> getChildEnrollments(Long childId) {
         return enrollmentRepository.findByChild_ChildId(childId.intValue()); // If childId is Long
     }
-
+    public List<Enrollment> getPendingEnrollments() {
+        return enrollmentRepository.findByStatus("PENDING");
+    }
     public Enrollment enrollChild(Enrollment enrollment) {
         Kindergarten kindergarten = enrollment.getKindergarten();
 

@@ -11,4 +11,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByChild_ChildId(Integer childId); // for child enrollments
 
     List<Enrollment> findByKindergarten_KindergartenId(Integer kindergartenId); // for kindergarten capacity check
+
+    List<Enrollment> findByStatus(String pending);
 }
