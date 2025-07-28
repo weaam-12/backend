@@ -29,7 +29,6 @@ public class EnrollmentService {
         return enrollmentRepository.findByChild_ChildId(childId.intValue()); // If childId is Long
     }
 
-
     public Enrollment enrollChild(Enrollment enrollment) {
         Kindergarten kindergarten = enrollment.getKindergarten();
 

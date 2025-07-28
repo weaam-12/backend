@@ -34,4 +34,11 @@ public class EnrollmentController {
     public void cancelEnrollment(@PathVariable Long id) {
         enrollmentService.cancelEnrollment(id);
     }
+
+    // Resident can update their child's enrollment status
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN')")
+    public Enrollment updateEnrollmentStatus(@PathVariable Long id, @RequestBody String newStatus) {
+        return enrollmentService.updateEnrollmentStatus(id, newStatus);
+    }
 }
