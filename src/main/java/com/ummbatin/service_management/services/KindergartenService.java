@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,5 +58,9 @@ public class KindergartenService {
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         return dto;
+    }
+
+    public Optional<Kindergarten> getKindergartenById(Integer kindergartenId) {
+        return kindergartenRepository.findById(kindergartenId);
     }
 }

@@ -7,11 +7,10 @@ public class EnrollmentRequestDTO {
     private Long childId;
     private Integer kindergartenId;
     private String status;
-    private String PaymentIntentId;
-
-
+    private String paymentMethodId;
+    private Long amount;
 
     public String getPaymentIntentId() {
-        return PaymentIntentId;
+        return paymentMethodId;
     }
 }

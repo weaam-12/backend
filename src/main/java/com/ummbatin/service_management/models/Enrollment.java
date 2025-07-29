@@ -5,10 +5,6 @@ package com.ummbatin.service_management.models;
 
 import jakarta.persistence.*;
 
-import jakarta.persistence.*;
-
-import java.util.Date;
-
 @Entity
 @Table(name = "enrollments")
 public class Enrollment {
@@ -24,9 +20,14 @@ public class Enrollment {
     @JoinColumn(name = "kindergarten_id", nullable = false)
     private Kindergarten kindergarten;
 
-    @Column(nullable = false)
-    private String status; // ENROLLED, WAITLISTED, CANCELLED
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
+    @Column(nullable = false)
+    private String status;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -51,15 +52,20 @@ public class Enrollment {
         this.kindergarten = kindergarten;
     }
 
+    public Payment getPayment(String paymentIntentId) {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
+
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public void setPaymentIntentId(String paymentIntentId) {
     }
 
 }

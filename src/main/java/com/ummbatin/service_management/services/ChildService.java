@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ChildService {
@@ -33,5 +34,12 @@ public class ChildService {
     public Child createChild(Child child) {
         return childRepository.save(child);
     }
+    
+
+    public Optional<Child> getChildById(Long childId) {
+        return childRepository.findById(Math.toIntExact(childId));
+    }
+
+
 
 }

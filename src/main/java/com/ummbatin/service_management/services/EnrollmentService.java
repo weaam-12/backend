@@ -60,7 +60,7 @@ public class EnrollmentService {
     public Enrollment createFinalEnrollment(String paymentIntentId) {
         Enrollment enrollment = new Enrollment();
         enrollment.setStatus("PENDING"); // أو "APPROVED" حسب متطلباتك
-        enrollment.setPaymentIntentId(paymentIntentId);
+        enrollment.getPayment(paymentIntentId);
 
         // 4. حفظ التسجيل في قاعدة البيانات
         return enrollmentRepository.save(enrollment);
