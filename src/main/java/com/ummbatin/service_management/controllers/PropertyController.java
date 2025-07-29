@@ -29,7 +29,7 @@ public class PropertyController {
     private static final Logger logger = LoggerFactory.getLogger(PropertyController.class);
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENT')")
     public ResponseEntity<?> getPropertiesByUser(@PathVariable Long userId) {
         logger.info("Request received for properties of user ID: {}", userId);
         try {
