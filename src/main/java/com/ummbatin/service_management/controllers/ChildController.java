@@ -23,14 +23,18 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/children")
 public class ChildController {
-    @Autowired
-    private ChildService childService;
-    private UserService userService;
+    private final ChildService childService;
+    private final UserService userService;
 
+    @Autowired
+    public ChildController(ChildService childService, UserService userService) {
+        this.childService = childService;
+        this.userService = userService;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Child createChild(@RequestBody ChildRequestDTO childDTO) {
+    public ResponseEntity<Child> createChild(@RequestBody ChildRequestDTO childDTO) {
         Child child = new Child();
         child.setName(childDTO.getName());
         child.setBirthDate(childDTO.getBirthDate());
@@ -45,26 +49,21 @@ public class ChildController {
             child.setKindergarten(kindergarten);
         }
 
-        return childService.createChild(child);
+        Child savedChild = childService.createChild(child);
+        return ResponseEntity.ok(savedChild);
     }
-
-
 
     @GetMapping("/my-children")
     public ResponseEntity<List<ChildDto>> getMyChildren() {
         try {
-            // الحصول على معلومات المستخدم الحالي
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
 
-            // البحث عن User بواسطة اسم المستخدم (email)
             User user = userService.findByEmail(username)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            // الحصول على الأطفال المرتبطين بهذا المستخدم
             List<Child> children = childService.getChildrenByUserId(user.getUserId());
 
-            // تحويل List<Child> إلى List<ChildDto>
             List<ChildDto> childDtos = children.stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
@@ -76,6 +75,7 @@ public class ChildController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     private ChildDto convertToDto(Child child) {
         ChildDto dto = new ChildDto();
         dto.setChildId(child.getChildId());
@@ -88,23 +88,6 @@ public class ChildController {
         }
 
         return dto;
-    }
-    @ControllerAdvice
-    public class GlobalExceptionHandler {
-        @ExceptionHandler(ResourceNotFoundException.class)
-        public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<?> handleGeneralException(Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
-        }
-    }
-
-    @Autowired
-    public ChildController(ChildService childService) {
-        this.childService = childService;
     }
 
     @GetMapping("/user/{userId}")
@@ -119,10 +102,16 @@ public class ChildController {
         return ResponseEntity.ok(children);
     }
 
-    @PostMapping
-    public ResponseEntity<Child> createChild(@RequestBody Child child) {
-        Child savedChild = childService.createChild(child);
-        return ResponseEntity.ok(savedChild);
-    }
+    @ControllerAdvice
+    public class GlobalExceptionHandler {
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
 
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<?> handleGeneralException(Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
+    }
 }
