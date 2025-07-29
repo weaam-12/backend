@@ -52,7 +52,7 @@ public class KindergartenService {
 
     private UserDto convertUserToDto(User user) {
         UserDto dto = new UserDto();
-        dto.setUserId(user.getUserId());
+        dto.setUserId(user.getId());
         dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());

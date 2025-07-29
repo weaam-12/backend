@@ -27,7 +27,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private Long id;;
 
     @Column(nullable = false)
     private String fullName;
@@ -93,7 +93,7 @@ public class User implements UserDetails {
 
     public UserDto toDto() {
         return UserDto.builder()
-                .id(this.userId)
+                .id(this.id)
                 .fullName(this.fullName)
                 .email(this.email)
                 .phone(this.phone)
@@ -115,5 +115,11 @@ public class User implements UserDetails {
                                 .collect(Collectors.toList()) :
                         Collections.emptyList())
                 .build();
+    }
+
+
+    public void setUserId(Long userId) {
+        this.id = userId;
+
     }
 }

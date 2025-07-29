@@ -138,7 +138,7 @@ public class UserDto {
     }
 
     public UserDto(User user) {
-        this.id = user.getUserId();
+        this.id = user.getId();
         this.fullName = user.getFullName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
