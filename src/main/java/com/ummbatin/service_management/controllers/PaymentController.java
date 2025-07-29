@@ -229,7 +229,7 @@ public class PaymentController {
 
         try {
 
-            // 1. إنشاء PaymentIntent مع Stripe (بدون حفظ أي بيانات في DB)
+            // 1. إنشاء PaymentIntent مع Stripe (بدون حفظf أي بيانات في DB)
             PaymentIntent intent = PaymentIntent.create(
                     new PaymentIntentCreateParams.Builder()
                             .setAmount(paymentRequest.getAmount()) // المبلغ بالسنترات (مثال: 1000 = 10.00 USD)
