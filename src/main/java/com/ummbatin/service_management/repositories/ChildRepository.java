@@ -11,8 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface ChildRepository extends JpaRepository<Child, Integer> {
-
-
     @Query("SELECT c FROM Child c WHERE c.user.userId = :userId")
     List<Child> findByUserId(@Param("userId") Long userId);
 
