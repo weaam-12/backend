@@ -52,7 +52,7 @@ public class UserService {
         user.setRole(userRole);
 
         User savedUser = userRepository.save(user);
-        log.info("User saved with ID: {}", savedUser.getId());
+        log.info("User saved with ID: {}", savedUser.getUserId());
 
         // 2. حفظ الزوجات
         List<Wife> wives = dto.getWives().stream()

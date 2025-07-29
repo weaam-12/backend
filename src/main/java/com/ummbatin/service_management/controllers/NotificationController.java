@@ -30,6 +30,6 @@ public class NotificationController {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return notificationService.getForUser(user.getId());
+        return notificationService.getForUser(user.getUserId());
     }
 }

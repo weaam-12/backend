@@ -136,7 +136,7 @@ public class PaymentService {
     private PaymentDto toDto(Payment p) {
         return new PaymentDto(
                 p.getPaymentId().longValue(),
-                p.getUser().getId(),
+                p.getUser().getUserId(),
                 p.getUser().getFullName(),
                 p.getType(),
                 p.getAmount(),
@@ -216,7 +216,7 @@ public class PaymentService {
     private PaymentDto convertToDto(Payment payment) {
         PaymentDto dto = new PaymentDto();
         dto.setPaymentId(payment.getPaymentId().longValue());
-        dto.setUserId(payment.getUser().getId());
+        dto.setUserId(payment.getUser().getUserId());
         dto.setPaymentType(payment.getType());
         dto.setAmount(payment.getAmount());
         dto.setStatus(payment.getStatus());
@@ -228,7 +228,7 @@ public class PaymentService {
 
         Payment payment = new Payment();
         payment.setUser(new User());
-        payment.getUser().setId(paymentRequest.getUserId());
+        payment.getUser().setUserId(paymentRequest.getUserId());
         payment.setAmount(paymentRequest.getAmount().doubleValue() / 100);
         payment.setType(paymentRequest.getPaymentType());
         payment.setStatus("PENDING");
@@ -300,10 +300,10 @@ public class PaymentService {
         List<User> users = userRepository.findAll();
         return users.stream().map(user -> {
             UserWithPaymentsDto dto = new UserWithPaymentsDto();
-            dto.setUserId(user.getId());
+            dto.setUserId(user.getUserId());
             dto.setUserName(user.getFullName());
 
-            List<Property> userProperties = propertyRepository.findByUser_UserId(user.getId());
+            List<Property> userProperties = propertyRepository.findByUser_UserId(user.getUserId());
             if (!userProperties.isEmpty()) {
                 Property property = userProperties.get(0);
                 dto.setPropertyId(property.getPropertyId());

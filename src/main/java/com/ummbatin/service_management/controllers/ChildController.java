@@ -62,7 +62,7 @@ public class ChildController {
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
             // الحصول على الأطفال المرتبطين بهذا المستخدم
-            List<Child> children = childService.getChildrenByUserId(user.getId());
+            List<Child> children = childService.getChildrenByUserId(user.getUserId());
 
             // تحويل List<Child> إلى List<ChildDto>
             List<ChildDto> childDtos = children.stream()
