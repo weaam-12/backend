@@ -32,6 +32,9 @@ import java.time.LocalDate;
         @JoinColumn(name = "wife_id", nullable = false)
         private Wife wife;
 
+        @Column(name = "wife_id", nullable = false)
+        private Long wifeId;
+
         @ManyToOne
         @JoinColumn(name = "kindergarten_id")
         private Kindergarten kindergarten;
@@ -91,5 +94,13 @@ import java.time.LocalDate;
             dto.setName(this.name);
             dto.setBirthDate(this.birthDate.toString());
             return dto;
+        }
+
+        public Long getWifeId() {
+            return wifeId;
+        }
+
+        public void setWifeId(Long wifeId) {
+            this.wifeId = wifeId;
         }
     }

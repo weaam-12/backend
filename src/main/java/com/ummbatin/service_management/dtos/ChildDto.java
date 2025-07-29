@@ -7,7 +7,10 @@ public class ChildDto {
     private String name;
     private String birthDate;
     private String MotherName ;
-    private UserDto user; // Add this field
+    private UserDto user;
+    private Integer kindergartenId;
+    private String KindergartenName ;
+// Add this field
 
     public String getMotherName() {
         return MotherName;
@@ -15,6 +18,15 @@ public class ChildDto {
 
     public void setUser(UserDto user) {
         this.user = user;
+    }
+
+    public void setKindergartenId(Integer kindergartenId) {
+        this.kindergartenId = kindergartenId;
+    }
+
+
+    public void setKindergartenName(String KindergartenName) {
+        this.KindergartenName = KindergartenName;
     }
 }
 
