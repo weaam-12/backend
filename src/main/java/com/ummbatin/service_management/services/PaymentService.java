@@ -223,29 +223,6 @@ public class PaymentService {
         return dto;
     }
 
-    public PaymentResponse processPayment(PaymentRequest paymentRequest) throws StripeException {
-        PaymentIntent paymentIntent = createPaymentIntent(paymentRequest.getAmount());
-
-        Payment payment = new Payment();
-        payment.setUser(new User());
-        payment.getUser().setUserId(paymentRequest.getUserId());
-        payment.setAmount(paymentRequest.getAmount().doubleValue() / 100);
-        payment.setType(paymentRequest.getPaymentType());
-        payment.setStatus("PENDING");
-        payment.setTransactionId(paymentIntent.getId());
-        payment.setDate(LocalDate.now());
-        paymentRepository.save(payment);
-
-        PaymentResponse response = new PaymentResponse();
-        response.setPaymentId(paymentIntent.getId());
-        response.setClientSecret(paymentIntent.getClientSecret());
-        response.setAmount(paymentRequest.getAmount());
-        response.setCurrency(paymentRequest.getCurrency());
-        response.setDescription(paymentRequest.getDescription());
-        response.setStatus("requires_payment_method");
-
-        return response;
-    }
     public ApiResponse generateCustomWaterPayments(List<CustomWaterPaymentRequest> requests) {
         try {
             LocalDateTime currentDateTime = LocalDateTime.now();
@@ -335,4 +312,37 @@ public class PaymentService {
         }).collect(Collectors.toList());
     }
 
+
+    public PaymentResponse processPayment(PaymentRequest paymentRequest) throws StripeException {
+        Stripe.apiKey = stripeApiKey;
+
+        // 1. الحصول على المستخدم والعقار
+        User user = userRepository.findById(paymentRequest.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Property property = propertyRepository.findByUser_UserId(user.getUserId())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("User has no properties"));
+
+        // 2. إنشاء PaymentIntent مع Stripe
+        PaymentIntent paymentIntent = createPaymentIntent(paymentRequest.getAmount());
+
+        // 3. إنشاء كائن Payment وتعيين جميع الحقول المطلوبة
+        Payment payment = new Payment();
+        payment.setUser(user);
+        payment.setProperty(property); // تأكد من تعيين العقار
+        payment.setAmount(paymentRequest.getAmount() / 100.0); // تحويل المبلغ من سنتات
+        payment.setType(paymentRequest.getPaymentType());
+        payment.setStatus("PENDING");
+        payment.setTransactionId(paymentIntent.getId());
+        payment.setDate(LocalDate.now());
+        payment.setServiceId(1L); // تعيين serviceId افتراضي إذا كان غير متوفر
+
+        paymentRepository.save(payment); // الحفظ في قاعدة البيانات
+
+        // 4. إعداد الاستجابة
+        PaymentResponse response = new PaymentResponse();
+        response.setClientSecret(paymentIntent.getClientSecret());
+        return response;
+    }
 }

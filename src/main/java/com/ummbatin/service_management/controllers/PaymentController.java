@@ -1,28 +1,35 @@
 package com.ummbatin.service_management.controllers;
 
+import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import com.ummbatin.service_management.dtos.*;
 import com.ummbatin.service_management.models.Enrollment;
 import com.ummbatin.service_management.models.Payment;
+import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.repositories.UserRepository;
 import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
 import com.ummbatin.service_management.services.StripeService;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments") // أضف /api هنا
 public class PaymentController {
 
     private final PaymentService paymentService;
-
+    private UserRepository userRepository;
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
@@ -32,7 +39,8 @@ public class PaymentController {
 
     @Autowired
     private EnrollmentService enrollmentService;
-
+    @Value("${stripe.api.key}")
+    private String apiKey;
     @GetMapping("/all")
     public ResponseEntity<List<PaymentDto>> getAllPayments(
             @RequestParam(required = false) Integer month,
@@ -132,17 +140,6 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @PostMapping("/process")
-    public ResponseEntity<?> processPayment(@RequestBody PaymentRequest paymentRequest) {
-        try {
-            PaymentResponse response = paymentService.processPayment(paymentRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse(false, "Payment processing failed: " + e.getMessage()));
-        }
-    }
-
     @GetMapping("/users-with-payments")
     public ResponseEntity<List<UserWithPaymentsDto>> getUsersWithPayments(
             @RequestParam int month,
@@ -227,6 +224,30 @@ public class PaymentController {
         return "Payment confirmed and enrollment created with ID: " + enrollment.getId();
     }
 
+    @PostMapping("/process")
+    public ResponseEntity<?> processPayment(@RequestBody PaymentRequest paymentRequest) {
 
+        try {
 
+            // 1. إنشاء PaymentIntent مع Stripe (بدون حفظ أي بيانات في DB)
+            PaymentIntent intent = PaymentIntent.create(
+                    new PaymentIntentCreateParams.Builder()
+                            .setAmount(paymentRequest.getAmount()) // المبلغ بالسنترات (مثال: 1000 = 10.00 USD)
+                            .setCurrency("ils") // أو "usd"
+                            .setDescription(paymentRequest.getDescription())
+                            .build()
+            );
+
+            // 2. إرجاع clientSecret فقط لفتح صفحة الدفع
+            Map<String, String> response = new HashMap<>();
+            response.put("clientSecret", intent.getClientSecret());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("فشل في عملية الدفع: " + e.getMessage());
+        }
+    }
 }
+
+
+

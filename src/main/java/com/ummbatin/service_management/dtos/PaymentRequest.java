@@ -6,6 +6,7 @@ public class PaymentRequest {
     private String paymentType;
     private String description;
     private String currency = "ils"; // default to Israeli Shekel
+    private String Email; // default to Israeli Shekel
 
     // Getters and Setters
     public Long getUserId() {
@@ -46,5 +47,9 @@ public class PaymentRequest {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getEmail() {
+        return Email;
     }
 }
