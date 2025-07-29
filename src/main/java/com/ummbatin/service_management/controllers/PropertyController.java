@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.ummbatin.service_management.config.JwtAuthenticationFilter.logger;
 
 @RestController
 @RequestMapping("/api/properties")
