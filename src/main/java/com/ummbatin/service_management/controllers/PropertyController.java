@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -31,15 +33,20 @@ public class PropertyController {
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENT')")
     public ResponseEntity<?> getPropertiesByUser(@PathVariable Long userId) {
-        logger.info("Request received for properties of user ID: {}", userId);
-        try {
-            List<Property> properties = propertyService.getPropertiesByUserId(userId);
-            logger.debug("Found {} properties for user {}", properties.size(), userId);
-            return ResponseEntity.ok(properties);
-        } catch (Exception e) {
-            logger.error("Error fetching properties for user {}: {}", userId, e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
+        List<Property> properties = propertyService.getPropertiesByUserId(userId);
+
+        List<Map<String, Object>> response = properties.stream()
+                .map(property -> {
+                    Map<String, Object> propMap = new HashMap<>();
+                    propMap.put("propertyId", property.getPropertyId());
+                    propMap.put("address", property.getAddress());
+                    propMap.put("area", property.getArea());
+                    propMap.put("numberOfUnits", property.getNumberOfUnits());
+                    return propMap;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
