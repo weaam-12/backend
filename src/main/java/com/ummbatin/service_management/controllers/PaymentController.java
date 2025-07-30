@@ -9,6 +9,7 @@ import com.ummbatin.service_management.models.*;
 import com.ummbatin.service_management.repositories.*;
 import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
+
 import com.ummbatin.service_management.services.StripeService;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class PaymentController {
 
     @Autowired
     private KindergartenRepository kindergartenRepository;
+
+    @Autowired
+    private PropertyRepository propertyRepository;
 
     @Autowired
     private StripeService stripeService;
@@ -233,7 +237,9 @@ public class PaymentController {
 
             // تعيين القيم الثابتة
             payment.setServiceId(8888888L); // القيمة الثابتة لـ service_id
-            payment.setPropertyId(8888888L); // القيمة الثابتة لـ property_id
+            Property defaultProperty = propertyRepository.findById(8888888) // بدون L للنوع long
+                    .orElseThrow(() -> new RuntimeException("Property not found with ID: 8888888"));
+            payment.setProperty(defaultProperty);
 
             Payment savedPayment = paymentRepository.save(payment);
 
