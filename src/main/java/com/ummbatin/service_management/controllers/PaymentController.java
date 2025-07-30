@@ -223,25 +223,23 @@ public class PaymentController {
             User user = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // تحويل المبلغ إلى دولار (إذا كان بالسنترات)
-            long amountInCents = request.getAmount(); // 3500 سنت = 35.00 دولار
-            double amountInDollars = amountInCents / 100.0;
+            // تحويل المبلغ من سنتس إلى دولار (إذا كان 3500 سنت = 35.00 دولار)
+            double amountInDollars = request.getAmount() / 100.0;
 
-            PaymentIntent intent = stripeService.createPaymentIntent(amountInCents);
-
+            // إنشاء سجل الدفع بدون Stripe
             Payment payment = new Payment();
             payment.setUser(user);
-            payment.setAmount(amountInDollars); // كمثال: 35.0
+            payment.setAmount(amountInDollars);
             payment.setType("KINDERGARTEN");
-            payment.setStatus("PENDING");
-            payment.setTransactionId(intent.getId());
+            payment.setStatus("PAID"); // تم تعيينها كمدفوعة مباشرة
+            payment.setTransactionId("manual-payment-" + System.currentTimeMillis());
             payment.setDate(LocalDate.now());
 
             Payment savedPayment = paymentRepository.save(payment);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("clientSecret", intent.getClientSecret());
             response.put("paymentId", savedPayment.getPaymentId());
+            response.put("status", "PAID");
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
