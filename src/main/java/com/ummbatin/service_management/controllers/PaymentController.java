@@ -215,26 +215,41 @@ public class PaymentController {
     public ResponseEntity<?> createKindergartenPayment(
             @RequestBody KindergartenPaymentRequest request) {
         try {
-            PaymentIntent intent = stripeService.createPaymentIntent(request.getAmount());
+            // التحقق من وجود البيانات المطلوبة
+            if (request.getUserId() == null || request.getAmount() == null) {
+                return ResponseEntity.badRequest().body("User ID and amount are required");
+            }
 
-            // إنشاء سجل الدفع في قاعدة البيانات
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // تحويل المبلغ إلى دولار (إذا كان بالسنترات)
+            long amountInCents = request.getAmount(); // 3500 سنت = 35.00 دولار
+            double amountInDollars = amountInCents / 100.0;
+
+            PaymentIntent intent = stripeService.createPaymentIntent(amountInCents);
+
             Payment payment = new Payment();
-            payment.setUser(userRepository.findById(request.getUserId()).orElseThrow());
-            payment.setAmount(request.getAmount().doubleValue()); // تحويل Long إلى Double
+            payment.setUser(user);
+            payment.setAmount(amountInDollars); // كمثال: 35.0
             payment.setType("KINDERGARTEN");
             payment.setStatus("PENDING");
             payment.setTransactionId(intent.getId());
             payment.setDate(LocalDate.now());
-            paymentRepository.save(payment); // استخدم paymentRepository مباشرة أو أضف savePayment إلى PaymentService
+
+            Payment savedPayment = paymentRepository.save(payment);
 
             Map<String, Object> response = new HashMap<>();
             response.put("clientSecret", intent.getClientSecret());
-            response.put("paymentId", payment.getPaymentId());
+            response.put("paymentId", savedPayment.getPaymentId());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error creating payment: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating payment: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/enroll-child")
     public ResponseEntity<?> enrollChild(@RequestBody ChildEnrollmentRequest request) {
