@@ -214,16 +214,15 @@ public class PaymentController {
     public ResponseEntity<?> createKindergartenPayment(
             @RequestBody KindergartenPaymentRequest request) {
         try {
-            // 1. التحقق من صحة البيانات
+            // التحقق من وجود البيانات المطلوبة
             if (request.getUserId() == null || request.getAmount() == null) {
                 return ResponseEntity.badRequest().body("User ID and amount are required");
             }
 
-            // 2. البحث عن المستخدم
             User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // 3. إنشاء سجل الدفع
+            // إنشاء سجل الدفع مع القيم الثابتة
             Payment payment = new Payment();
             payment.setUser(user);
             payment.setAmount(request.getAmount() / 100.0); // تحويل من سنت إلى دولار
@@ -232,19 +231,21 @@ public class PaymentController {
             payment.setTransactionId("manual-" + System.currentTimeMillis());
             payment.setDate(LocalDate.now());
 
+            // تعيين القيم الثابتة
+            payment.setServiceId(8888888L); // القيمة الثابتة لـ service_id
+            payment.setPropertyId(8888888L); // القيمة الثابتة لـ property_id
+
             Payment savedPayment = paymentRepository.save(payment);
 
-            // 4. إعداد الاستجابة
             return ResponseEntity.ok(Map.of(
                     "paymentId", savedPayment.getPaymentId(),
                     "status", "PAID",
-                    "message", "Payment created successfully"
+                    "message", "Payment created successfully with fixed property_id and service_id"
             ));
-
         } catch (Exception e) {
-            e.printStackTrace(); // تسجيل الخطأ للسجلات
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing payment: " + e.getMessage());
+                    .body("Error creating payment: " + e.getMessage());
         }
     }
 

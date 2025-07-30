@@ -149,4 +149,8 @@ public class Payment {
     public void setType(String type) {
         this.type = type;
     }
+
+    public void setPropertyId(long l) {
+        this.paymentId = Math.toIntExact(l);
+    }
 }
