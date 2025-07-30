@@ -5,10 +5,11 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.ummbatin.service_management.dtos.*;
+import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Enrollment;
 import com.ummbatin.service_management.models.Payment;
 import com.ummbatin.service_management.models.User;
-import com.ummbatin.service_management.repositories.UserRepository;
+import com.ummbatin.service_management.repositories.*;
 import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
 import com.ummbatin.service_management.services.StripeService;
@@ -18,11 +19,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.ummbatin.service_management.repositories.ChildRepository;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments") // أضف /api هنا
@@ -33,9 +35,18 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private ChildRepository childRepository;
+
+    @Autowired
+    private KindergartenRepository kindergartenRepository;
 
     @Autowired
     private StripeService stripeService;
+
 
     @Autowired
     private EnrollmentService enrollmentService;
@@ -198,20 +209,56 @@ public class PaymentController {
         }
     }
 
+
+
     @PostMapping("/create-kindergarten")
-    public String createKindergartenPayment(
-            @RequestParam Long childId,
-            @RequestParam Integer kindergartenId,
-            @RequestParam Long amount) throws Exception {
+    public ResponseEntity<?> createKindergartenPayment(
+            @RequestBody KindergartenPaymentRequest request) {
+        try {
+            PaymentIntent intent = stripeService.createPaymentIntent(request.getAmount());
 
-        // 1. إنشاء PaymentIntent مع Stripe
-        PaymentIntent intent = stripeService.createPaymentIntent(amount);
+            // إنشاء سجل الدفع في قاعدة البيانات
+            Payment payment = new Payment();
+            payment.setUser(userRepository.findById(request.getUserId()).orElseThrow());
+            payment.setAmount(request.getAmount().doubleValue()); // تحويل Long إلى Double
+            payment.setType("KINDERGARTEN");
+            payment.setStatus("PENDING");
+            payment.setTransactionId(intent.getId());
+            payment.setDate(LocalDate.now());
+            paymentRepository.save(payment); // استخدم paymentRepository مباشرة أو أضف savePayment إلى PaymentService
 
-        // 2. حفظ معلومات التسجيل مؤقتًا (يمكن استخدام Redis أو جدول مؤقت)
-        // enrollmentService.saveTemporaryEnrollment(childId, kindergartenId, intent.getId());
-
-        return intent.getClientSecret();
+            Map<String, Object> response = new HashMap<>();
+            response.put("clientSecret", intent.getClientSecret());
+            response.put("paymentId", payment.getPaymentId());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error creating payment: " + e.getMessage());
+        }
     }
+
+    @PostMapping("/enroll-child")
+    public ResponseEntity<?> enrollChild(@RequestBody ChildEnrollmentRequest request) {
+        try {
+            // تحديث بيانات الطفل
+            Child child = childRepository.findById(Math.toIntExact(request.getChildId())).orElseThrow();
+            child.setKindergarten(kindergartenRepository.findById(request.getKindergartenId()).orElseThrow());
+            childRepository.save(child);
+
+            // تحديث حالة الدفع
+            Optional<Payment> paymentOpt = paymentRepository.findById(request.getPaymentId());
+            if (paymentOpt.isPresent()) {
+                Payment payment = paymentOpt.get();
+                payment.setStatus("PAID");
+                paymentRepository.save(payment);
+            }
+
+            return ResponseEntity.ok("Child enrolled successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Enrollment failed: " + e.getMessage());
+        }
+    }
+
+
 
     @PostMapping("/confirm-kindergarten")
     public String confirmKindergartenPayment(
@@ -248,6 +295,8 @@ public class PaymentController {
         }
     }
 }
+
+
 
 
 

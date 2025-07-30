@@ -18,7 +18,7 @@ import java.time.LocalDate;
         private String name;
 
         @Column(name = "monthly_fee")
-        private Double monthlyFee;
+        private Double monthlyFee = 35.0;
 
         @Column(name = "birth_date", nullable = false)
         @JsonFormat(pattern = "yyyy-MM-dd")
