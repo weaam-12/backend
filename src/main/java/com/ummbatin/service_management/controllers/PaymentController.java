@@ -5,10 +5,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.ummbatin.service_management.dtos.*;
-import com.ummbatin.service_management.models.Child;
-import com.ummbatin.service_management.models.Enrollment;
-import com.ummbatin.service_management.models.Payment;
-import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.models.*;
 import com.ummbatin.service_management.repositories.*;
 import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
@@ -31,7 +28,9 @@ import java.util.Optional;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    @Autowired
     private UserRepository userRepository;
+
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
@@ -215,62 +214,76 @@ public class PaymentController {
     public ResponseEntity<?> createKindergartenPayment(
             @RequestBody KindergartenPaymentRequest request) {
         try {
-            // التحقق من وجود البيانات المطلوبة
+            // 1. التحقق من صحة البيانات
             if (request.getUserId() == null || request.getAmount() == null) {
                 return ResponseEntity.badRequest().body("User ID and amount are required");
             }
 
+            // 2. البحث عن المستخدم
             User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUserId()));
 
-            // تحويل المبلغ من سنتس إلى دولار (إذا كان 3500 سنت = 35.00 دولار)
-            double amountInDollars = request.getAmount() / 100.0;
-
-            // إنشاء سجل الدفع بدون Stripe
+            // 3. إنشاء سجل الدفع
             Payment payment = new Payment();
             payment.setUser(user);
-            payment.setAmount(amountInDollars);
+            payment.setAmount(request.getAmount() / 100.0); // تحويل من سنت إلى دولار
             payment.setType("KINDERGARTEN");
-            payment.setStatus("PAID"); // تم تعيينها كمدفوعة مباشرة
-            payment.setTransactionId("manual-payment-" + System.currentTimeMillis());
+            payment.setStatus("PAID");
+            payment.setTransactionId("manual-" + System.currentTimeMillis());
             payment.setDate(LocalDate.now());
 
             Payment savedPayment = paymentRepository.save(payment);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("paymentId", savedPayment.getPaymentId());
-            response.put("status", "PAID");
+            // 4. إعداد الاستجابة
+            return ResponseEntity.ok(Map.of(
+                    "paymentId", savedPayment.getPaymentId(),
+                    "status", "PAID",
+                    "message", "Payment created successfully"
+            ));
 
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace(); // تسجيل الخطأ للسجلات
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating payment: " + e.getMessage());
+                    .body("Error processing payment: " + e.getMessage());
         }
     }
-
 
     @PostMapping("/enroll-child")
     public ResponseEntity<?> enrollChild(@RequestBody ChildEnrollmentRequest request) {
         try {
-            // تحديث بيانات الطفل
-            Child child = childRepository.findById(Math.toIntExact(request.getChildId())).orElseThrow();
-            child.setKindergarten(kindergartenRepository.findById(request.getKindergartenId()).orElseThrow());
+            // 1. التحقق من وجود الطفل
+            Child child = childRepository.findById(request.getChildId().intValue())
+                    .orElseThrow(() -> new RuntimeException("Child not found with ID: " + request.getChildId()));
+
+            // 2. التحقق من وجود الحضانة
+            Kindergarten kindergarten = kindergartenRepository.findById(request.getKindergartenId())
+                    .orElseThrow(() -> new RuntimeException("Kindergarten not found with ID: " + request.getKindergartenId()));
+
+            // 3. تحديث بيانات الطفل
+            child.setKindergarten(kindergarten);
             childRepository.save(child);
 
-            // تحديث حالة الدفع
-            Optional<Payment> paymentOpt = paymentRepository.findById(request.getPaymentId());
-            if (paymentOpt.isPresent()) {
-                Payment payment = paymentOpt.get();
-                payment.setStatus("PAID");
-                paymentRepository.save(payment);
+            // 4. تحديث حالة الدفع (إذا كان paymentId موجودًا)
+            if (request.getPaymentId() != null) {
+                paymentRepository.findById(request.getPaymentId())
+                        .ifPresent(p -> {
+                            p.setStatus("PAID");
+                            paymentRepository.save(p);
+                        });
             }
 
-            return ResponseEntity.ok("Child enrolled successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Enrollment failed: " + e.getMessage());
-        }
-    }
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Child enrolled successfully"
+            ));
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Enrollment failed: " + e.getMessage());
+        }
+
+}
 
 
     @PostMapping("/confirm-kindergarten")
