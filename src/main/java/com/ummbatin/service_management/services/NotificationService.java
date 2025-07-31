@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -19,10 +20,6 @@ public class NotificationService {
                                UserService userService) {
         this.notificationRepository = notificationRepository;
         this.userService = userService;
-    }
-
-    public List<Notification> getForUser(Long userId) {
-        return notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
     }
 
     public List<Notification> getAdminNotifications() {
@@ -54,6 +51,11 @@ public class NotificationService {
 
         return notificationRepository.save(notification);
     }
-
+    public List<Notification> getForUser(Long userId) {
+        if (userId == null) {
+            return Collections.emptyList();
+        }
+        return notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
+    }
 
 }
