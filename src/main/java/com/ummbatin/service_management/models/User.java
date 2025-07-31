@@ -122,4 +122,8 @@ public class User implements UserDetails {
         this.userId = userId;
 
     }
+
+    public Role getRoles() {
+        return  this.role;
+    }
 }
