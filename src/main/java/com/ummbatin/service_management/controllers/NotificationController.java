@@ -1,6 +1,7 @@
 package com.ummbatin.service_management.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ummbatin.service_management.dtos.NotificationDTO;
 import com.ummbatin.service_management.models.Notification;
 import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.services.NotificationService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -29,32 +31,34 @@ public class NotificationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> myNotifications(Authentication authentication) {
+    public ResponseEntity<List<NotificationDTO>> myNotifications(Authentication authentication) {
         try {
             if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("{\"error\":\"Not authenticated\"}");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            // Get email from token
             String email = authentication.getName();
-
-            // Find user by email
             User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Get notifications for user
             List<Notification> notifications = notificationService.getForUser(user.getUserId());
 
-            // Return properly formatted JSON
-            ObjectMapper mapper = new ObjectMapper();
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(mapper.writeValueAsString(notifications));
+            List<NotificationDTO> dtos = notifications.stream()
+                    .map(n -> {
+                        NotificationDTO dto = new NotificationDTO();
+                        dto.setNotificationId(n.getNotificationId());
+                        dto.setMessage(n.getMessage());
+                        dto.setType(n.getType());
+                        dto.setStatus(n.getStatus());
+                        dto.setCreatedAt(n.getCreatedAt());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtos);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\":\"" + e.getMessage() + "\"}");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
