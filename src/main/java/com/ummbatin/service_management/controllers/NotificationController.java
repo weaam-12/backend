@@ -36,20 +36,25 @@ public class NotificationController {
                         .body("{\"error\":\"Not authenticated\"}");
             }
 
-            Long userId = getUserIdFromAuthentication(authentication);
-            List<Notification> notifications = notificationService.getForUser(userId);
+            // Get email from token
+            String email = authentication.getName();
 
+            // Find user by email
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+            // Get notifications for user
+            List<Notification> notifications = notificationService.getForUser(user.getUserId());
+
+            // Return properly formatted JSON
             ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(notifications != null ? notifications : Collections.emptyList());
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(json);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"error\":\"" + e.getMessage() + "\"}");
+                    .body(mapper.writeValueAsString(notifications));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\":\"Internal server error\"}");
+                    .body("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
