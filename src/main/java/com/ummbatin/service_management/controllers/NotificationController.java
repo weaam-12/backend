@@ -31,22 +31,25 @@ public class NotificationController {
     @GetMapping("/me")
     public ResponseEntity<String> myNotifications(Authentication authentication) {
         try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("{\"error\":\"Not authenticated\"}");
+            }
+
             Long userId = getUserIdFromAuthentication(authentication);
             List<Notification> notifications = notificationService.getForUser(userId);
 
-            if (notifications == null) {
-                notifications = Collections.emptyList();
-            }
-
-            // Use proper JSON serialization
             ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(notifications);
+            String json = mapper.writeValueAsString(notifications != null ? notifications : Collections.emptyList());
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\"error\":\"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("[]");
+                    .body("{\"error\":\"Internal server error\"}");
         }
     }
 
@@ -56,13 +59,27 @@ public class NotificationController {
     }
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("Authentication not available");
+        }
 
-        // استخدم email للبحث عن المستخدم
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Handle case where principal might be the email directly
+        if (authentication.getPrincipal() instanceof String) {
+            String email = (String) authentication.getPrincipal();
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            return user.getUserId();
+        }
 
-        return user.getUserId(); // تأكد أن هذه القيمة ليست null
+        // Handle UserDetails case
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            return user.getUserId();
+        }
+
+        throw new RuntimeException("Unsupported principal type");
     }
 }
