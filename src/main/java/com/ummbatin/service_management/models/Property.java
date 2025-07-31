@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ummbatin.service_management.dtos.PropertyDto;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -23,7 +24,8 @@ public class Property {
     private Integer numberOfUnits;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
