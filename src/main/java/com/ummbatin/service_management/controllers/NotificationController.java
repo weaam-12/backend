@@ -1,11 +1,13 @@
 package com.ummbatin.service_management.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ummbatin.service_management.models.Notification;
 import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.services.NotificationService;
 import com.ummbatin.service_management.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,20 +29,24 @@ public class NotificationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<Notification>> myNotifications(Authentication authentication) {
+    public ResponseEntity<String> myNotifications(Authentication authentication) {
         try {
             Long userId = getUserIdFromAuthentication(authentication);
             List<Notification> notifications = notificationService.getForUser(userId);
 
-            // تأكد من أن القائمة ليست null
             if (notifications == null) {
                 notifications = Collections.emptyList();
             }
 
-            return ResponseEntity.ok(notifications);
+            // Use proper JSON serialization
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(notifications);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(json);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.emptyList());
+                    .body("[]");
         }
     }
 
