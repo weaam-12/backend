@@ -98,39 +98,58 @@ public class PaymentService {
             paymentRepository.save(payment);
         }
     }
+    public ApiResponse generateWaterBillForProperty(int month, int year, double amount, Long userId, Long propertyId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Property prop = propertyRepository.findById(Math.toIntExact(propertyId)).orElseThrow(() -> new RuntimeException("Property not found"));
 
-    public ApiResponse generateWaterBills(int month, int year, double rate, Long userId) {
-        List<User> users = userId != null
-                ? List.of(userRepository.findById(userId).orElseThrow())
-                : userRepository.findAll();
-
-        int generated = 0;
         LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-        for (User user : users) {
-            for (Property prop : user.getProperties()) {
-                boolean exists = paymentRepository.existsByUserAndTypeAndDateBetween(
-                        user, "WATER", start, end);
-                if (exists) continue;
-
-                double amount = prop.getArea().doubleValue() * rate;
-
-                Payment payment = new Payment();
-                payment.setUser(user);
-                payment.setProperty(prop);
-                payment.setAmount(amount);
-                payment.setType("WATER");
-                payment.setStatus("PENDING");
-                payment.setDate(start);
-                payment.setServiceId(2L); // خدمة المياه
-                payment.setPaymentDate(LocalDateTime.now());
-
-                paymentRepository.save(payment);
-                generated++;
-            }
+        boolean exists = paymentRepository.existsByUserAndPropertyAndTypeAndDateBetween(
+                user, prop, "WATER", start, end);
+        if (exists) {
+            return new ApiResponse(false, "فاتورة موجودة مسبقًا");
         }
-        return new ApiResponse(true, "تم توليد " + generated + " فاتورة مياه بنجاح");
+
+        Payment payment = new Payment();
+        payment.setUser(user);
+        payment.setProperty(prop);
+        payment.setAmount(amount);
+        payment.setType("WATER");
+        payment.setStatus("PENDING");
+        payment.setDate(start);
+        payment.setServiceId(2L); // خدمة المياه
+        payment.setPaymentDate(LocalDateTime.now());
+
+        paymentRepository.save(payment);
+        return new ApiResponse(true, "تم توليد فاتورة مياه بنجاح");
+    }
+    public ApiResponse generateWaterBill(double amount, Long userId, Long propertyId, int month, int year) {
+        User user = userRepository.findById(userId).orElseThrow();
+        Property property = propertyRepository.findById(Math.toIntExact(propertyId)).orElseThrow();
+
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        boolean exists = paymentRepository.existsByUserAndPropertyAndTypeAndDateBetween(
+                user, property, "WATER", start, end);
+        if (exists) {
+            return new ApiResponse(false, "فاتورة المياه موجودة مسبقًا لهذا العقار في هذا الشهر");
+        }
+
+        Payment payment = new Payment();
+        payment.setUser(user);
+        payment.setProperty(property);
+        payment.setAmount(amount);
+        payment.setType("WATER");
+        payment.setStatus("PENDING");
+        payment.setDate(start);
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setServiceId(2L); // خدمة المياه
+
+        paymentRepository.save(payment);
+
+        return new ApiResponse(true, "تم توليد فاتورة مياه للعقار بنجاح");
     }
 
     private PaymentDto toDto(Payment p) {

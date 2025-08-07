@@ -1,6 +1,7 @@
 package com.ummbatin.service_management.repositories;
 
 import com.ummbatin.service_management.models.Payment;
+import com.ummbatin.service_management.models.Property;
 import com.ummbatin.service_management.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,4 +43,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
             LocalDate endDate);
     List<Payment> findByType(String type);
     List<Payment> findByUser_UserIdAndType(Long userId, String type);
+
+    boolean existsByUserAndPropertyAndTypeAndDateBetween(User user, Property property, String water, LocalDate start, LocalDate end);
 }

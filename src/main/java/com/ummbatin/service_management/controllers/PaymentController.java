@@ -92,16 +92,20 @@ public class PaymentController {
     public ResponseEntity<ApiResponse> generateWaterBills(
             @RequestParam int month,
             @RequestParam int year,
-            @RequestParam double rate,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam double amount,
+            @RequestParam Long userId,
+            @RequestParam Long propertyId
+    ) {
         try {
-            ApiResponse response = paymentService.generateWaterBills(month, year, rate, userId);
+            ApiResponse response = paymentService.generateWaterBillForProperty(
+                    month, year, amount, userId, propertyId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse(false, "Failed to generate water bills: " + e.getMessage()));
+                    .body(new ApiResponse(false, "Failed to generate water bill: " + e.getMessage()));
         }
     }
+
 
     @PostMapping("/generate-arnona")
     public ResponseEntity<ApiResponse> generateArnonaBills(
