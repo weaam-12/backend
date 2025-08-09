@@ -197,7 +197,7 @@ public class PaymentService {
 
         for (User user : users) {
             for (Property property : user.getProperties()) {
-                double amount = property.getArea().doubleValue() * 3.0; // حساب الأرنونا بناءً على المساحة أو عدد الوحدات
+                double amount = property.getArea().doubleValue() * 50 * property.getNumberOfUnits(); // حساب الأرنونا بناءً على المساحة أو عدد الوحدات
 
                 Payment payment = new Payment();
                 payment.setUser(user);
