@@ -229,7 +229,7 @@ public class PaymentService {
             paymentRepository.save(p);
             return new ApiResponse(true, "Payment status updated successfully");
         }
-        return new ApiResponse(false, "Payment not found");
+        return new ApiResponse(false, "Payment bbnnot found");
     }
 
     private PaymentDto convertToDto(Payment payment) {
