@@ -16,7 +16,9 @@ public class ChildDto {
     public String getMotherName() {
         return MotherName;
     }
-
+    public void setMonthlyFee(Double monthlyFee) {
+        this.monthly_fee = monthlyFee;
+    }
     public void setUser(UserDto user) {
         this.user = user;
     }

@@ -18,8 +18,7 @@ import java.time.LocalDate;
         private String name;
 
         @Column(name = "monthly_fee")
-        public Double monthly_fee
-                = 0.5;
+        public Double monthly_fee;
 
         @Column(name = "birth_date", nullable = false)
         @JsonFormat(pattern = "yyyy-MM-dd")
@@ -86,7 +85,9 @@ import java.time.LocalDate;
         public void setKindergarten(Kindergarten kindergarten) {
             this.kindergarten = kindergarten;
         }
-
+        public Double getMonthlyFee() {
+            return monthly_fee;
+        }
         public ChildDto toDto() {
             ChildDto dto = new ChildDto();
             dto.setChildId(this.childId);
