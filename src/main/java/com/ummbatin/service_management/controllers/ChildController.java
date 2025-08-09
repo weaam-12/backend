@@ -81,6 +81,8 @@ public class ChildController {
         dto.setChildId(child.getChildId());
         dto.setName(child.getName());
         dto.setBirthDate(child.getBirthDate().toString());
+        dto.setMonthly_fee(child.monthly_fee);
+
 
         if (child.getKindergarten() != null) {
             dto.setKindergartenId(child.getKindergarten().getKindergartenId());

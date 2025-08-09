@@ -10,6 +10,7 @@ public class ChildDto {
     private UserDto user;
     private Integer kindergartenId;
     private String KindergartenName ;
+    private double monthly_fee;
 // Add this field
 
     public String getMotherName() {
