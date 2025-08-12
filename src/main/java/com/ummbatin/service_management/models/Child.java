@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ummbatin.service_management.dtos.ChildDto;
 import jakarta.persistence.*;
@@ -18,13 +19,14 @@ import java.time.LocalDate;
         private String name;
 
         @Column(name = "monthly_fee")
-        public Double monthly_fee;
+        public Double monthly_fee = 1.1;
 
         @Column(name = "birth_date", nullable = false)
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate birthDate;
 
         @ManyToOne
+        @JsonBackReference
         @JoinColumn(name = "user_id", nullable = false)
         private User user;
 
@@ -85,8 +87,8 @@ import java.time.LocalDate;
         public void setKindergarten(Kindergarten kindergarten) {
             this.kindergarten = kindergarten;
         }
-        public Double getMonthlyFee() {
-            return monthly_fee;
+        public Double getMonthly_fee() {
+            return monthly_fee != null ? monthly_fee : 0.0;
         }
         public ChildDto toDto() {
             ChildDto dto = new ChildDto();

@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ummbatin.service_management.dtos.UserDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<Child> children;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
