@@ -6,18 +6,18 @@ public class ChildDto {
     private Integer childId;
     private String name;
     private String birthDate;
-    private String MotherName ;
+    private Double monthlyFee;   // ← أضفه
+    private String motherName;
     private UserDto user;
     private Integer kindergartenId;
     private String KindergartenName ;
-    private Double monthly_fee;
 // Add this field
 
     public String getMotherName() {
-        return MotherName;
+        return motherName;
     }
     public void setMonthly_fee(Double monthly_fee) {
-        this.monthly_fee = monthly_fee;
+        this.monthlyFee = monthly_fee;
     }
     public void setUser(UserDto user) {
         this.user = user;

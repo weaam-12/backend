@@ -81,13 +81,14 @@ public class ChildController {
         dto.setChildId(child.getChildId());
         dto.setName(child.getName());
         dto.setBirthDate(child.getBirthDate().toString());
-        dto.setMonthly_fee(child.getMonthly_fee());
-
+        dto.setMonthlyFee(child.getMonthly_fee());          // ← أضفه
         if (child.getKindergarten() != null) {
             dto.setKindergartenId(child.getKindergarten().getKindergartenId());
             dto.setKindergartenName(child.getKindergarten().getName());
         }
-
+        if (child.getWife() != null) {
+            dto.setMotherName(child.getWife().getName());   // ← أضفه
+        }
         return dto;
     }
 

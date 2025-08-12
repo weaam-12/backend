@@ -96,10 +96,13 @@ import java.time.LocalDate;
             dto.setChildId(this.childId);
             dto.setName(this.name);
             dto.setBirthDate(this.birthDate.toString());
-            dto.setMonthly_fee(this.monthly_fee);
+            dto.setMonthlyFee(this.monthly_fee);          // ← أضفه
             if (this.kindergarten != null) {
                 dto.setKindergartenId(this.kindergarten.getKindergartenId());
                 dto.setKindergartenName(this.kindergarten.getName());
+            }
+            if (this.wife != null) {
+                dto.setMotherName(this.wife.getName());   // ← أضفه
             }
             return dto;
         }
