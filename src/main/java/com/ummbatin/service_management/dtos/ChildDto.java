@@ -16,8 +16,8 @@ public class ChildDto {
     public String getMotherName() {
         return MotherName;
     }
-    public void setMonthlyFee(Double monthlyFee) {
-        this.monthly_fee = monthly_fee != null ? monthly_fee : 0.0;
+    public void setMonthly_fee(Double monthly_fee) {
+        this.monthly_fee = monthly_fee;
     }
     public void setUser(UserDto user) {
         this.user = user;

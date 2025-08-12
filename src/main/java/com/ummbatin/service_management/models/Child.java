@@ -90,12 +90,17 @@ import java.time.LocalDate;
         public Double getMonthly_fee() {
             return monthly_fee != null ? monthly_fee : 0.0;
         }
+
         public ChildDto toDto() {
             ChildDto dto = new ChildDto();
             dto.setChildId(this.childId);
             dto.setName(this.name);
             dto.setBirthDate(this.birthDate.toString());
             dto.setMonthly_fee(this.monthly_fee);
+            if (this.kindergarten != null) {
+                dto.setKindergartenId(this.kindergarten.getKindergartenId());
+                dto.setKindergartenName(this.kindergarten.getName());
+            }
             return dto;
         }
     }
