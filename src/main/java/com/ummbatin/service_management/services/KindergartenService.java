@@ -47,6 +47,17 @@ public class KindergartenService {
         dto.setChildId(child.getChildId());
         dto.setName(child.getName());
         dto.setBirthDate(child.getBirthDate().toString());
+
+        dto.setMonthlyFee(child.getMonthly_fee());            // ← NEW
+        if (child.getWife() != null) {
+            dto.setMotherName(child.getWife().getName());     // ← NEW
+        }
+        if (child.getKindergarten() != null) {                // ← NEW
+            dto.setKindergartenId(child.getKindergarten().getKindergartenId());
+            dto.setKindergartenName(child.getKindergarten().getName());
+        }
+
+        // if you still want to embed the parent user
         dto.setUser(convertUserToDto(child.getUser()));
         return dto;
     }
