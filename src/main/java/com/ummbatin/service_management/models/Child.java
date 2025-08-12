@@ -18,8 +18,8 @@ import java.time.LocalDate;
         @Column(name = "name", nullable = false)
         private String name;
 
-        @Column(name = "monthly_fee")
-        public Double monthly_fee = 1.1;
+        @Column(name = "monthly_fee", columnDefinition = "DECIMAL(10,2) default 0.0")
+        private Double monthly_fee = 0.0;
 
         @Column(name = "birth_date", nullable = false)
         @JsonFormat(pattern = "yyyy-MM-dd")
