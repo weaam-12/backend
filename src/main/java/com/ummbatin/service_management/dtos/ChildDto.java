@@ -10,14 +10,14 @@ public class ChildDto {
     private UserDto user;
     private Integer kindergartenId;
     private String KindergartenName ;
-    private double monthly_fee;
+    private Double monthly_fee;
 // Add this field
 
     public String getMotherName() {
         return MotherName;
     }
     public void setMonthlyFee(Double monthlyFee) {
-        this.monthly_fee = monthlyFee;
+        this.monthly_fee = monthly_fee != null ? monthly_fee : 0.0;
     }
     public void setUser(UserDto user) {
         this.user = user;
