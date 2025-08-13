@@ -7,6 +7,7 @@ import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.repositories.ChildRepository;
+import com.ummbatin.service_management.repositories.KindergartenRepository;
 import com.ummbatin.service_management.services.ChildService;
 import com.ummbatin.service_management.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class ChildController {
     private final ChildService childService;
     private final UserService userService;
     ChildRepository childRepository;
-
+    KindergartenRepository kindergartenRepository;
     @Autowired
     public ChildController(ChildService childService, UserService userService) {
         this.childService = childService;
@@ -109,6 +110,20 @@ public class ChildController {
         return ResponseEntity.ok(children);
     }
 
+    @PatchMapping("/{childId}/assign")
+    public ResponseEntity<Object> assignChildToKindergarten(
+            @PathVariable Integer childId,
+            @RequestParam Integer kindergartenId,
+            @RequestParam Double monthlyFee) {
+        return childRepository.findById(childId).map(child -> {
+            Kindergarten kg = kindergartenRepository.findById(kindergartenId).orElse(null);
+            if (kg == null) return ResponseEntity.notFound().build();
+            child.setKindergarten(kg);
+            child.setMonthly_fee(monthlyFee);   // 3.5 (approved) أو 1.5 (rejected)
+            childRepository.save(child);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
     @GetMapping("/wife/{wifeId}")
     public ResponseEntity<List<Child>> getChildrenByWife(@PathVariable Long wifeId) {
         List<Child> children = childService.getChildrenByWifeId(wifeId);
