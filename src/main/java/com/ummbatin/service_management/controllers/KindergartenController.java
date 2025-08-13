@@ -54,15 +54,4 @@ public class KindergartenController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    @PatchMapping("/{id}/approve")
-    public ResponseEntity<Void> setApproval(
-            @PathVariable Integer id,
-            @RequestParam Boolean approved) {
-        return kindergartenRepository.findById(id).map(kg -> {
-            kg.setMonthlyFee(approved ? 3.5 : 1.5);
-            kindergartenRepository.save(kg);
-            return ResponseEntity.ok().build();
-        }).orElse(ResponseEntity.notFound().build());
-    }
 }
