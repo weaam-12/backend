@@ -106,4 +106,8 @@ import java.time.LocalDate;
             }
             return dto;
         }
+
+        public void setMonthly_fee(double v) {
+            this.monthly_fee = v;
+        }
     }

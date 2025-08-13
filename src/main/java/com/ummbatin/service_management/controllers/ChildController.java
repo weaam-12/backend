@@ -6,6 +6,7 @@ import com.ummbatin.service_management.exceptions.ResourceNotFoundException;
 import com.ummbatin.service_management.models.Child;
 import com.ummbatin.service_management.models.Kindergarten;
 import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.repositories.ChildRepository;
 import com.ummbatin.service_management.services.ChildService;
 import com.ummbatin.service_management.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class ChildController {
     private final ChildService childService;
     private final UserService userService;
+    ChildRepository childRepository;
 
     @Autowired
     public ChildController(ChildService childService, UserService userService) {
@@ -90,6 +91,16 @@ public class ChildController {
             dto.setMotherName(child.getWife().getName());   // ← أضفه
         }
         return dto;
+    }
+    @PatchMapping("/{childId}/approve")
+    public ResponseEntity<Object> approveChild(
+            @PathVariable Integer childId,
+            @RequestParam Boolean approved) {
+        return childRepository.findById(childId).map(child -> {
+            child.setMonthly_fee(approved ? 3.5 : 1.5);
+            childRepository.save(child);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
