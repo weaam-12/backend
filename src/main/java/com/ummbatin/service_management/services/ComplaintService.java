@@ -28,6 +28,14 @@ public class ComplaintService {
     public Optional<Complaint> getComplaintById(Integer complaintId) {
         return complaintRepository.findById(complaintId);
     }
+    public Complaint updateComplaintStatus(Integer complaintId, String status) {
+        return complaintRepository.findById(complaintId)
+                .map(existing -> {
+                    existing.setStatus(status.toUpperCase());
+                    return complaintRepository.save(existing);
+                })
+                .orElseThrow(() -> new RuntimeException("Complaint not found with id: " + complaintId));
+    }
 
     public Complaint createComplaint(Complaint complaint) {
         complaint.setDate(LocalDateTime.now());
@@ -44,12 +52,6 @@ public class ComplaintService {
         return complaintRepository.save(complaint);
     }
 
-    public Complaint updateComplaintStatus(Integer complaintId, String status) {
-        return complaintRepository.findById(complaintId).map(existing -> {
-            existing.setStatus(status);
-            return complaintRepository.save(existing);
-        }).orElse(null);
-    }
 
     public void deleteComplaint(Integer complaintId) {
         complaintRepository.deleteById(complaintId);

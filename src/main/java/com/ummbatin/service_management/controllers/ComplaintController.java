@@ -9,6 +9,7 @@ import com.ummbatin.service_management.services.ComplaintService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,9 +65,14 @@ public class ComplaintController {
 
     @PatchMapping("/{complaintId}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public Complaint updateComplaintStatus(
-            @PathVariable Integer complaintId,
-            @RequestBody Map<String, String> request) {
-        return complaintService.updateComplaintStatus(complaintId, request.get("status"));
+    public ResponseEntity<?> updateComplaintStatus(
+            @PathVariable Integer complaintId, // غير إلى Integer
+            @RequestBody String status) {
+        try {
+            Complaint updated = complaintService.updateComplaintStatus(complaintId, status);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating complaint status: " + e.getMessage());
+        }
     }
 }
