@@ -74,13 +74,15 @@ public class ComplaintController {
             @PathVariable Integer complaintId,
             @RequestBody Map<String, String> body) {
         try {
-            String responseText = body.get("response");
+            String response = body.get("response");
             Complaint complaint = complaintService.getComplaintById(complaintId)
                     .orElseThrow(() -> new RuntimeException("Complaint not found"));
-            complaint.setResponse(responseText);
-            complaint.setStatus("RESPONDED");
+
+            complaint.setResponse(response);
+            complaint.setStatus("RESOLVED"); // أو أي حالة تحبيها
             complaintRepository.save(complaint);
-            return ResponseEntity.ok(complaint);
+
+            return ResponseEntity.ok(complaint); // ✅ رجع الشكوى كاملة بعد التحديث
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
