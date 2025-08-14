@@ -5,8 +5,10 @@ import com.cloudinary.utils.ObjectUtils;
 import com.ummbatin.service_management.dtos.ComplaintCreateDTO;
 import com.ummbatin.service_management.dtos.ComplaintResponseDTO;
 import com.ummbatin.service_management.models.Complaint;
+import com.ummbatin.service_management.repositories.ComplaintRepository;
 import com.ummbatin.service_management.services.ComplaintService;
 import jakarta.validation.Valid;
+import org.apache.catalina.Store;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,9 @@ public class ComplaintController {
             "api_key", "621292534649539",
             "api_secret", "X9RvH5Jl5JDXWbmaFC4AlBBrpkI",
             "secure",     true));
+
+    @Autowired
+    ComplaintRepository complaintRepository;
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -61,6 +66,24 @@ public class ComplaintController {
     @PreAuthorize("hasRole('RESIDENT')")
     public List<Complaint> getMyComplaints(@PathVariable Long userId) {
         return complaintService.getComplaintsByUserId(userId);
+    }
+
+    @PostMapping("/{complaintId}/response")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> respondToComplaint(
+            @PathVariable Integer complaintId,
+            @RequestBody Map<String, String> body) {
+        try {
+            String responseText = body.get("response");
+            Complaint complaint = complaintService.getComplaintById(complaintId)
+                    .orElseThrow(() -> new RuntimeException("Complaint not found"));
+            complaint.setResponse(responseText);
+            complaint.setStatus("RESPONDED");
+            complaintRepository.save(complaint);
+            return ResponseEntity.ok(complaint);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
 
     @PatchMapping("/{complaintId}/status")
