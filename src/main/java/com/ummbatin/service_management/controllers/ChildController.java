@@ -24,10 +24,15 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/children")
 public class ChildController {
+    @Autowired
+    private ChildRepository childRepository;
+
+    @Autowired
+    private KindergartenRepository kindergartenRepository;
+
     private final ChildService childService;
     private final UserService userService;
-    ChildRepository childRepository;
-    KindergartenRepository kindergartenRepository;
+
     @Autowired
     public ChildController(ChildService childService, UserService userService) {
         this.childService = childService;
@@ -93,6 +98,7 @@ public class ChildController {
         }
         return dto;
     }
+
     @PatchMapping("/{childId}/approve")
     public ResponseEntity<Object> approveChild(
             @PathVariable Integer childId,
@@ -116,16 +122,20 @@ public class ChildController {
             @RequestParam Integer kindergartenId,
             @RequestParam Double monthlyFee) {
 
-        return childRepository.findById(childId).map(child -> {
-            Kindergarten kg = kindergartenRepository.findById(kindergartenId).orElse(null);
-            if (kg == null) return ResponseEntity.notFound().build();
+        Child child = childRepository.findById(childId)
+                .orElseThrow(() -> new ResourceNotFoundException("Child not found"));
 
-            child.setKindergarten(kg);
-            child.setMonthly_fee(monthlyFee);
-            childRepository.save(child);
-            return ResponseEntity.ok().build();
-        }).orElse(ResponseEntity.notFound().build());
+        Kindergarten kg = kindergartenRepository.findById(kindergartenId)
+                .orElseThrow(() -> new ResourceNotFoundException("Kindergarten not found"));
+
+        child.setKindergarten(kg);
+        child.setMonthly_fee(monthlyFee);
+        childRepository.save(child);
+
+        return ResponseEntity.ok().build();
     }
+
+
     @GetMapping("/wife/{wifeId}")
     public ResponseEntity<List<Child>> getChildrenByWife(@PathVariable Long wifeId) {
         List<Child> children = childService.getChildrenByWifeId(wifeId);
