@@ -129,6 +129,22 @@ public class ChildController {
         List<Child> children = childService.getChildrenByWifeId(wifeId);
         return ResponseEntity.ok(children);
     }
+    @PatchMapping("/{childId}/assign")
+    public ResponseEntity<Object> assignChild(
+            @PathVariable Integer childId,
+            @RequestParam Integer kindergartenId,
+            @RequestParam Double monthlyFee) {
+
+        return childRepository.findById(childId).map(child -> {
+            Kindergarten kg = kindergartenRepository.findById(kindergartenId).orElse(null);
+            if (kg == null) return ResponseEntity.notFound().build();
+
+            child.setKindergarten(kg);
+            child.setMonthly_fee(monthlyFee);   // 1.5 أو 3.5
+            childRepository.save(child);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
 
     @ControllerAdvice
     public class GlobalExceptionHandler {
