@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/complaints")
@@ -61,10 +62,11 @@ public class ComplaintController {
         return complaintService.getComplaintsByUserId(userId);
     }
 
-    // Only Admin can update complaint status
-    @PutMapping("/{userId}/status")
+    @PatchMapping("/{complaintId}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public Complaint updateComplaintStatus(@PathVariable Integer userId, @RequestParam String status) {
-        return complaintService.updateComplaintStatus(userId, status);
+    public Complaint updateComplaintStatus(
+            @PathVariable Integer complaintId,
+            @RequestBody Map<String, String> request) {
+        return complaintService.updateComplaintStatus(complaintId, request.get("status"));
     }
 }
