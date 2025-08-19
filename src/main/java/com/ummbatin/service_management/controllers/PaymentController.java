@@ -88,6 +88,55 @@ public class PaymentController {
         }
     }
 
+    @PostMapping("/validate-and-record")
+    public ResponseEntity<?> validateAndRecord(
+            @RequestParam Long userId,
+            @RequestParam Double amount,     // المبلغ بالدولار
+            @RequestParam String paymentMethodId, // الـ ID اللي ترجعه Stripe.js
+            @RequestParam String type        // مثلاً KINDERGARTEN
+    ) {
+        try {
+            long amountCents = (long)(amount * 100);
+
+            PaymentIntent intent = PaymentIntent.create(
+                    PaymentIntentCreateParams.builder()
+                            .setAmount(amountCents)
+                            .setCurrency("ils")          // أو "usd"
+                            .setPaymentMethod(paymentMethodId)
+                            .setConfirm(true)            // تأكيد فوري
+                            .setCaptureMethod(PaymentIntentCreateParams.CaptureMethod.MANUAL) // ما نخصم لحالنا
+                            .build()
+            );
+
+            // 3. لو التأكيد نجح
+            if ("succeeded".equalsIgnoreCase(intent.getStatus())) {
+                // سجّل الدفع في قاعدة البيانات
+                Payment payment = paymentService.createPayment(
+                        userId, amount, type, intent.getId()
+                );
+                payment.setStatus("PAID");
+                paymentRepository.save(payment);
+
+                return ResponseEntity.ok(Map.of(
+                        "valid", true,
+                        "paymentId", payment.getPaymentId()
+                ));
+            } else {
+                // البطاقة غير صالحة
+                return ResponseEntity.ok(Map.of(
+                        "valid", false,
+                        "error", "بطاقة غير صالحة"
+                ));
+            }
+
+        } catch (StripeException ex) {
+            return ResponseEntity.ok(Map.of(
+                    "valid", false,
+                    "error", ex.getMessage()
+            ));
+        }
+    }
+
     @PostMapping("/generate-water")
     public ResponseEntity<ApiResponse> generateWaterBills(
             @RequestParam int month,
