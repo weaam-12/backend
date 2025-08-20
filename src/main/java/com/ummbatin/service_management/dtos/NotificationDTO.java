@@ -12,7 +12,17 @@ public class NotificationDTO {
     public Long getNotificationId() {
         return notificationId;
     }
-
+    public NotificationDTO(Long notificationId,
+                           String message,
+                           String type,
+                           String status,
+                           LocalDateTime createdAt) {
+        this.notificationId = notificationId;
+        this.message = message;
+        this.type = type;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
     public void setNotificationId(Long notificationId) {
         this.notificationId = notificationId;
     }

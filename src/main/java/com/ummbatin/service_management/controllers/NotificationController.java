@@ -44,15 +44,13 @@ public class NotificationController {
             List<Notification> notifications = notificationService.getForUser(user.getUserId());
 
             List<NotificationDTO> dtos = notifications.stream()
-                    .map(n -> {
-                        NotificationDTO dto = new NotificationDTO();
-                        dto.setNotificationId(n.getNotificationId());
-                        dto.setMessage(n.getMessage());
-                        dto.setType(n.getType());
-                        dto.setStatus(n.getStatus());
-                        dto.setCreatedAt(n.getCreatedAt());
-                        return dto;
-                    })
+                    .map(n -> new NotificationDTO(
+                            n.getNotificationId(),
+                            n.getMessage(),
+                            n.getType(),
+                            n.getStatus(),
+                            n.getCreatedAt()
+                    ))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dtos);
@@ -63,8 +61,16 @@ public class NotificationController {
     }
 
     @GetMapping("/admin")
-    public List<Notification> adminNotifications() {
-        return notificationService.getAdminNotifications();
+    public List<NotificationDTO> adminNotifications() {
+        return notificationService.getAdminNotifications()
+                .stream()
+                .map(n -> new NotificationDTO(
+                        n.getNotificationId(),
+                        n.getMessage(),
+                        n.getType(),
+                        n.getStatus(),
+                        n.getCreatedAt()))
+                .collect(Collectors.toList());
     }
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
