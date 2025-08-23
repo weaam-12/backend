@@ -2,12 +2,18 @@ package com.ummbatin.service_management.models;
 
 import jakarta.persistence.*;
 import com.ummbatin.service_management.models.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor// <-- أضف هذا السطر
 @Table(name = "notifications")
 public class Notification {
     @Id

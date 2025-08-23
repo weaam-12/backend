@@ -1,16 +1,11 @@
-package com.ummbatin.service_management.models;
+package com.ummbatin.service_management.repositories;
 
 import com.ummbatin.service_management.dtos.UserDto;
-import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AuthenticationResponse {
     private String token;
     private UserDto user;
+
     public UserDto getUser() {
         return user;
     }

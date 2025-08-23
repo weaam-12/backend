@@ -1,7 +1,10 @@
 package com.ummbatin.service_management.dtos;
 
-import java.time.LocalDate;
+import lombok.Builder;
+import lombok.Data;
 
+import java.time.LocalDate;
+@Data
 public class PaymentDto {
     private Long paymentId;
     private Long userId;
