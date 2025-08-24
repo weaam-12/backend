@@ -93,26 +93,28 @@ public class PaymentController {
     public ResponseEntity<?> simulatePayment(
             @RequestParam Long userId,
             @RequestParam Double amount,
-            @RequestParam String type) {
+            @RequestParam String type,
+            @RequestParam Long propertyId) {
 
         try {
-            // 1. استرجاع المستخدم
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // 2. إنشاء سجل دفع بحالة PAID (بدون سحب فلوس)
+            Property property = propertyRepository.findById(Math.toIntExact(propertyId))
+                    .orElseThrow(() -> new RuntimeException("Property not found"));
+
             Payment payment = new Payment();
             payment.setUser(user);
             payment.setAmount(amount);
-            payment.setType(type.toUpperCase()); // WATER, ARNONA, KINDERGARTEN
+            payment.setType(type.toUpperCase());
             payment.setStatus("PAID");
             payment.setTransactionId("sim-" + System.currentTimeMillis());
-            payment.setDate(LocalDate.now());
+            payment.setPaymentDate(LocalDate.now().atStartOfDay());
+            payment.setServiceId(8888888L); // أو حدد service_id من نوع الدفع
+            payment.setProperty(property);
 
-            // 3. حفظ الدفعة
             Payment saved = paymentRepository.save(payment);
 
-            // 4. إرجاع الاستجابة
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "paymentId", saved.getPaymentId(),
@@ -120,13 +122,13 @@ public class PaymentController {
             ));
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of(
                     "success", false,
                     "message", e.getMessage()
             ));
         }
     }
-
 
     @PostMapping("/validate-and-record")
     public ResponseEntity<?> validateAndRecord(
