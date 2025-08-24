@@ -77,6 +77,7 @@ public class NotificationController {
                     req.getType());
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
+            e.printStackTrace(); // ✅ أضف هذا
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }
