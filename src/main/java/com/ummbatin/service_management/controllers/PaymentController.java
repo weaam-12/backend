@@ -88,6 +88,46 @@ public class PaymentController {
         }
     }
 
+
+    @PostMapping("/simulate-payment")
+    public ResponseEntity<?> simulatePayment(
+            @RequestParam Long userId,
+            @RequestParam Double amount,
+            @RequestParam String type) {
+
+        try {
+            // 1. استرجاع المستخدم
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // 2. إنشاء سجل دفع بحالة PAID (بدون سحب فلوس)
+            Payment payment = new Payment();
+            payment.setUser(user);
+            payment.setAmount(amount);
+            payment.setType(type.toUpperCase()); // WATER, ARNONA, KINDERGARTEN
+            payment.setStatus("PAID");
+            payment.setTransactionId("sim-" + System.currentTimeMillis());
+            payment.setDate(LocalDate.now());
+
+            // 3. حفظ الدفعة
+            Payment saved = paymentRepository.save(payment);
+
+            // 4. إرجاع الاستجابة
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "paymentId", saved.getPaymentId(),
+                    "message", "החיוב בוצע בהצלחה (מדומה)"
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+
     @PostMapping("/validate-and-record")
     public ResponseEntity<?> validateAndRecord(
             @RequestParam Long userId,
