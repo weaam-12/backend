@@ -109,7 +109,7 @@ public class NotificationController {
             response.put("errorCount", errors.size());
 
             if (!errors.isEmpty()) {
-                response.put("errors", errors);
+                response.put("erفrors", errors);
             }
 
             return ResponseEntity.ok(response);
