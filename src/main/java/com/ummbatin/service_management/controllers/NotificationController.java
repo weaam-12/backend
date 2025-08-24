@@ -1,6 +1,7 @@
 package com.ummbatin.service_management.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ummbatin.service_management.dtos.NotificationBroadcastRequest;
 import com.ummbatin.service_management.dtos.NotificationCreateRequest;
 import com.ummbatin.service_management.dtos.NotificationDTO;
 import com.ummbatin.service_management.models.Notification;
@@ -16,9 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -78,6 +77,44 @@ public class NotificationController {
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
             e.printStackTrace(); // ✅ أضفلالا هذا
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+    @PostMapping("/broadcast")
+    public ResponseEntity<?> broadcastNotification(@RequestBody NotificationBroadcastRequest req) {
+        try {
+            List<User> allUsers = userRepository.findAll();
+
+            int successCount = 0;
+            List<String> errors = new ArrayList<>();
+
+            for (User user : allUsers) {
+                try {
+                    notificationService.createUserNotification(
+                            user.getUserId(),
+                            req.getMessage(),
+                            req.getType()
+                    );
+                    successCount++;
+                } catch (Exception e) {
+                    errors.add("User " + user.getUserId() + ": " + e.getMessage());
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("totalUsers", allUsers.size());
+            response.put("successCount", successCount);
+            response.put("errorCount", errors.size());
+
+            if (!errors.isEmpty()) {
+                response.put("errors", errors);
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }
