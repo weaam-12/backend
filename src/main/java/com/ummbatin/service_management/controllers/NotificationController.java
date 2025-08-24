@@ -1,9 +1,11 @@
 package com.ummbatin.service_management.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ummbatin.service_management.dtos.NotificationCreateRequest;
 import com.ummbatin.service_management.dtos.NotificationDTO;
 import com.ummbatin.service_management.models.Notification;
 import com.ummbatin.service_management.models.User;
+import com.ummbatin.service_management.repositories.UserRepository;
 import com.ummbatin.service_management.services.NotificationService;
 import com.ummbatin.service_management.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +14,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
+
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+
+
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
@@ -57,6 +63,22 @@ public class NotificationController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createNotification(@RequestBody NotificationCreateRequest req) {
+        try {
+            User user = userRepository.findById(req.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            notificationService.createUserNotification(
+                    user.getUserId(),
+                    req.getMessage(),
+                    req.getType());
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
