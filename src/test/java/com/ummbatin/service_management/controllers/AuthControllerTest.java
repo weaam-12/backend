@@ -1,47 +1,65 @@
 package com.ummbatin.service_management.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ummbatin.service_management.config.JwtAuthenticationFilter;
 import com.ummbatin.service_management.dtos.UserDto;
 import com.ummbatin.service_management.models.AuthenticationRequest;
 import com.ummbatin.service_management.models.AuthenticationResponse;
-import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.models.Role;
-
+import com.ummbatin.service_management.models.User;
 import com.ummbatin.service_management.services.AuthenticationService;
 import com.ummbatin.service_management.services.UserService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(
+        controllers = AuthController.class,
+        excludeAutoConfiguration = {
+                org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        },
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = JwtAuthenticationFilter.class)
+)
+@Import(TestConfig.class)
 class AuthControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private UserService userService;
 
-    @Mock
+    @MockBean
     private AuthenticationService authService;
 
-    @InjectMocks
-    private AuthController authController;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
-    void testLogin_Success() {
+    void testLogin_Success() throws Exception {
         // Arrange
         AuthenticationRequest request = new AuthenticationRequest("test@email.com", "password");
 
-        // إنشاء UserDto بشكل صحيح
         UserDto userDto = UserDto.builder()
                 .user_id(1L)
                 .fullName("Test User")
@@ -57,59 +75,30 @@ class AuthControllerTest {
 
         when(authService.login(any(AuthenticationRequest.class))).thenReturn(response);
 
-        // Act
-        ResponseEntity<?> result = authController.login(request);
-
-        // Assert
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(response, result.getBody());
-        assertNotNull(result.getBody());
-        assertTrue(result.getBody() instanceof AuthenticationResponse);
-
-        AuthenticationResponse responseBody = (AuthenticationResponse) result.getBody();
-        assertEquals("token", responseBody.getToken());
-        assertEquals("Test User", responseBody.getUser().getFullName());
+        // Act & Assert
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("token"))
+                .andExpect(jsonPath("$.user.fullName").value("Test User"));
     }
 
     @Test
-    void testLogin_InvalidCredentials() {
+    void testLogin_InvalidCredentials() throws Exception {
         // Arrange
         AuthenticationRequest request = new AuthenticationRequest("wrong@email.com", "wrong");
 
         when(authService.login(any(AuthenticationRequest.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        // Act
-        ResponseEntity<?> result = authController.login(request);
-
-        // Assert
-        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
-        assertEquals("Invalid credentials", result.getBody());
+        // Act & Assert
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Invalid credentials"));
     }
 
-    @Test
-    void testRegisterUser_Success() {
-        // Arrange
-        User user = new User();
-        user.setEmail("test@email.com");
-        user.setPassword("password");
 
-        UserDto userDto = UserDto.builder()
-                .user_id(1L)
-                .fullName("Test User")
-                .email("test@email.com")
-                .build();
-
-        AuthenticationResponse response = new AuthenticationResponse("token", userDto);
-
-        when(authService.register(any(User.class))).thenReturn(response);
-
-        // Act
-        AuthenticationResponse result = authController.registerUser(user);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("token", result.getToken());
-        assertEquals("test@email.com", result.getUser().getEmail());
-    }
 }

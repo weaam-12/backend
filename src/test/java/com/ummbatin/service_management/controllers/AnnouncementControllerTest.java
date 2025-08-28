@@ -1,5 +1,6 @@
 package com.ummbatin.service_management.controllers;
 
+import com.ummbatin.service_management.config.JwtAuthenticationFilter;
 import com.ummbatin.service_management.models.Announcement;
 import com.ummbatin.service_management.repositories.AnnouncementRepository;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,9 @@ import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfig
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -28,8 +32,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 HibernateJpaAutoConfiguration.class,
                 JpaRepositoriesAutoConfiguration.class,
                 SecurityAutoConfiguration.class
-        }
+        },
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = JwtAuthenticationFilter.class)
 )
+
+
+@Import(TestConfig.class)
 class AnnouncementControllerTest {
 
     @Autowired

@@ -1,12 +1,20 @@
 package com.ummbatin.service_management.controllers;
 
+import com.ummbatin.service_management.config.JwtAuthenticationFilter;
 import com.ummbatin.service_management.dtos.ChildDto;
 import com.ummbatin.service_management.dtos.KindergartenDto;
+import com.ummbatin.service_management.repositories.KindergartenRepository;
 import com.ummbatin.service_management.services.KindergartenService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,12 +22,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(KindergartenController.class)
+@WebMvcTest(
+        controllers = KindergartenController.class,
+        excludeAutoConfiguration = {
+                DataSourceAutoConfiguration.class,
+                HibernateJpaAutoConfiguration.class,
+                SecurityAutoConfiguration.class
+        },
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = JwtAuthenticationFilter.class)
+)
 @Import(TestConfig.class)
 class KindergartenControllerTest {
 
@@ -29,10 +45,12 @@ class KindergartenControllerTest {
     @MockBean
     private KindergartenService kindergartenService;
 
+    @MockBean   // ←  NEW ‑ provides the missing bean
+    private KindergartenRepository kindergartenRepository;
+
     @Test
-    @WithMockUser // أضف هذا annotation
+    @WithMockUser
     void getAllKindergartens_ShouldReturnList() throws Exception {
-        // 1. إعداد الأطفال (ChildDto)
         ChildDto child1 = new ChildDto();
         child1.setChildId(1);
         child1.setName("الطفل الأول");
@@ -45,7 +63,6 @@ class KindergartenControllerTest {
         child3.setChildId(3);
         child3.setName("الطفل الثالث");
 
-        // 2. إعداد الروضات (KindergartenDto)
         KindergartenDto kg1 = new KindergartenDto();
         kg1.setKindergartenId(1);
         kg1.setName("روضة الأمل");
@@ -58,10 +75,8 @@ class KindergartenControllerTest {
 
         List<KindergartenDto> kindergartens = Arrays.asList(kg1, kg2);
 
-        // 3. Mock الخدمة
-        when(kindergartenService.getAllKindergartens()).thenReturn(kindergartens);
+        Mockito.when(kindergartenService.getAllKindergartens()).thenReturn(kindergartens);
 
-        // 4. تنفيذ الاختبار
         mockMvc.perform(get("/api/kindergartens"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
