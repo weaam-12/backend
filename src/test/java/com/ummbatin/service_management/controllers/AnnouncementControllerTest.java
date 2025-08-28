@@ -52,7 +52,7 @@ class AnnouncementControllerTest {
     void getActiveAnnouncements_returnsList() throws Exception {
         Announcement a = new Announcement();
         a.setId(1L);
-        a.setTitle("عيد مبارك");
+        a.setTitle("חג שמח");
         a.setActive(true);
         when(announcementRepository.findActiveAnnouncements(any(LocalDateTime.class)))
                 .thenReturn(List.of(a));
@@ -60,6 +60,6 @@ class AnnouncementControllerTest {
         mockMvc.perform(get("/api/announcements"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].title").value("عيد مبارك"));
+                .andExpect(jsonPath("$[0].title").value("חג שמח"));
     }
 }

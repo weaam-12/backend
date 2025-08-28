@@ -11,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class UmmBatinServiceManagementApplicationTests {
 
-	// ✅ أضف كل الـ Repositories اللي بيستخدمها الـ Service أو Controller
 	@MockBean
 	private UserRepository userRepository;
 
@@ -63,6 +62,5 @@ class UmmBatinServiceManagementApplicationTests {
 
 	@Test
 	void contextLoads() {
-		// ده اختبار بسيط عشان يتأكد إن الـ context شغال
 	}
 }

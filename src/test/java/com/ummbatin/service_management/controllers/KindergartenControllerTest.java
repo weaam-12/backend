@@ -53,24 +53,24 @@ class KindergartenControllerTest {
     void getAllKindergartens_ShouldReturnList() throws Exception {
         ChildDto child1 = new ChildDto();
         child1.setChildId(1);
-        child1.setName("الطفل الأول");
+        child1.setName("ילד1");
 
         ChildDto child2 = new ChildDto();
         child2.setChildId(2);
-        child2.setName("الطفل الثاني");
+        child2.setName("ילד2");
 
         ChildDto child3 = new ChildDto();
         child3.setChildId(3);
-        child3.setName("الطفل الثالث");
+        child3.setName("ילד3");
 
         KindergartenDto kg1 = new KindergartenDto();
         kg1.setKindergartenId(1);
-        kg1.setName("روضة الأمل");
+        kg1.setName("אלאפ");
         kg1.setChildren(Arrays.asList(child1, child2));
 
         KindergartenDto kg2 = new KindergartenDto();
         kg2.setKindergartenId(2);
-        kg2.setName("روضة المستقبل");
+        kg2.setName("בית");
         kg2.setChildren(Arrays.asList(child3));
 
         List<KindergartenDto> kindergartens = Arrays.asList(kg1, kg2);
@@ -80,11 +80,11 @@ class KindergartenControllerTest {
         mockMvc.perform(get("/api/kindergartens"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value("روضة الأمل"))
+                .andExpect(jsonPath("$[0].name").value("אלאפ"))
                 .andExpect(jsonPath("$[0].children.length()").value(2))
-                .andExpect(jsonPath("$[0].children[0].name").value("الطفل الأول"))
-                .andExpect(jsonPath("$[1].name").value("روضة المستقبل"))
+                .andExpect(jsonPath("$[0].children[0].name").value("ילד1"))
+                .andExpect(jsonPath("$[1].name").value("בית"))
                 .andExpect(jsonPath("$[1].children.length()").value(1))
-                .andExpect(jsonPath("$[1].children[0].name").value("الطفل الثالث"));
+                .andExpect(jsonPath("$[1].children[0].name").value("ילד3"));
     }
 }

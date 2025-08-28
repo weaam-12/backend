@@ -86,13 +86,12 @@ class AuthControllerTest {
 
     @Test
     void testLogin_InvalidCredentials() throws Exception {
-        // Arrange
+
         AuthenticationRequest request = new AuthenticationRequest("wrong@email.com", "wrong");
 
         when(authService.login(any(AuthenticationRequest.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
