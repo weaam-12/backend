@@ -59,6 +59,11 @@ public class UserDto {
         this.id = userId;
     }
 
+    public Long getUserId() {
+        return id;
+    }
+
+
     public static class UserDtoBuilder {
         private Long id;
         private String fullName;
@@ -70,6 +75,11 @@ public class UserDto {
         private List<WifeDto> wives = Collections.emptyList();
         private List<ChildDto> children = Collections.emptyList();
         private String password; // Add this field in the builder
+
+        public UserDtoBuilder userId(Long userId) {
+            this.id = userId;   // أو this.id = userId;
+            return this;        // ✓ return type == UserDtoBuilder
+        }
 
         public UserDtoBuilder user_id(Long user_id) {
             this.id = user_id;

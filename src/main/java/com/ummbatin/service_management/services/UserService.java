@@ -46,7 +46,7 @@ public class UserService {
         user.setEmail(dto.getUser().getEmail());
         user.setPassword(passwordEncoder.encode(dto.getUser().getPassword()));
         user.setPhone(dto.getUser().getPhone());
-
+        user.setUserId(dto.getUser().getUserId());
         Role userRole = roleRepository.findByRoleName("RESIDENT")
                 .orElseThrow(() -> new RuntimeException("Role RESIDENT not found"));
         user.setRole(userRole);
