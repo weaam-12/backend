@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PropertyService {
@@ -16,6 +17,9 @@ public class PropertyService {
         return propertyRepository.findByUser_UserId(userId);
     }
 
+    public Optional<Property> getPropertyById(Long propertyId) {
+        return propertyRepository.findById(Math.toIntExact(propertyId));
+    }
     public Property createProperty(Property property) {
         return propertyRepository.save(property);
     }

@@ -54,8 +54,6 @@ class UmmBatinServiceManagementApplicationTests {
 	private WaterReadingRepository waterReadingRepository;
 
 
-	@MockBean
-	private  PublicServiceRepository publicServiceRepository;
 
 	@MockBean
 	private FileStorageService fileStorageService;
