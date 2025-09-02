@@ -25,23 +25,19 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity//Allows you to use annotations like @PreAuthorize and @Secured on methods.
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
-    //Injecting the JWT filter to check tokens for each request.
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    //Injecting the custom user service for loading user details.
     private CustomUserDetailsService customUserDetailsService;
 
     @Autowired
-    //Injecting the entry point to handle unauthorized access ( return 401 JSON).
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
-    //Creates a bean for password encoding using BCrypt (hashes passwords securely).
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -55,7 +51,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    //Exposes AuthenticationManager bean, needed for AuthenticationService login.
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
@@ -64,8 +59,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))/// Enable CORS
-                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))// Handle unauthorized
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         // ✅ مسارات عامة ومفتوحة للجميع
                         .requestMatchers(
@@ -85,13 +80,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/residents/**")//equire ADMIN role only.
+                        .requestMatchers(HttpMethod.GET, "/api/residents/**")
                         .hasAnyRole("ADMIN", "RESIDENT")
 
                         .requestMatchers(HttpMethod.POST, "/api/residents/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers("/api/users/profile")//requires any authenticated user.
+                        .requestMatchers("/api/users/profile")
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/api/auth/**").permitAll() // ضروري لـ preflight
@@ -99,11 +94,11 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())//Sets the custom authentication provider.
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)//Adds JWT filter before Spring’s username/password filter.
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers
-                        .xssProtection(xss -> xss.disable())//turns off this extra header.
-                        .frameOptions(frame -> frame.sameOrigin())//(attackes)Only pages from the same website can show this site in an iframe.”
+                        .xssProtection(xss -> xss.disable())
+                        .frameOptions(frame -> frame.sameOrigin())
                 )
                 .build();
     }
@@ -117,9 +112,9 @@ public class SecurityConfig {
         ));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));//Exposes Authorization header (needed for JWT).
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);//Cache preflight response for 3600 seconds.
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
