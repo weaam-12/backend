@@ -1,5 +1,5 @@
 package com.ummbatin.service_management.utils;
-
+/// /
 public class ApiResponse<T> {
     private boolean success;
     private String message;

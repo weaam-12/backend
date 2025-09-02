@@ -110,7 +110,6 @@ public class PaymentController {
             payment.setStatus("PAID");
             payment.setTransactionId("sim-" + System.currentTimeMillis());
             payment.setPaymentDate(LocalDate.now().atStartOfDay());
-            payment.setServiceId(8888888L); // أو حدد service_id من نوع الدفع
             payment.setProperty(property);
 
             Payment saved = paymentRepository.save(payment);
@@ -331,7 +330,6 @@ public class PaymentController {
             payment.setDate(LocalDate.now());
 
             // تعيين القيم الثابتة
-            payment.setServiceId(8888888L); // القيمة الثابتة لـ service_id
             Property defaultProperty = propertyRepository.findById(8888888) // بدون L للنوع long
                     .orElseThrow(() -> new RuntimeException("Property not found with ID: 8888888"));
             payment.setProperty(defaultProperty);
@@ -341,7 +339,7 @@ public class PaymentController {
             return ResponseEntity.ok(Map.of(
                     "paymentId", savedPayment.getPaymentId(),
                     "status", "PAID",
-                    "message", "Payment created successfully with fixed property_id and service_id"
+                    "message", "Payment created successfully with fixed property_id "
             ));
         } catch (Exception e) {
             e.printStackTrace();

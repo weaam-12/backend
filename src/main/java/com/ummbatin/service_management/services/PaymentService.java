@@ -84,17 +84,15 @@ public class PaymentService {
         return paymentRepository.findByUser_UserIdAndType(userId, type);
     }
 
-    public void markPaymentAsCompleted(Long userId, String serviceId, String paymentIntentId, String receiptEmail) {
+    public void markPaymentAsCompleted(Long userId, String paymentIntentId, String receiptEmail) {
         Optional<Payment> optionalPayment = paymentRepository.findByUser_UserIdAndServiceIdAndTransactionId(
                 userId,
-                Long.parseLong(serviceId),
                 paymentIntentId
         );
         if (optionalPayment.isPresent()) {
             Payment payment = optionalPayment.get();
             payment.setStatus("COMPLETED");
             payment.setPaymentDate(LocalDateTime.now());
-            payment.setReceiptEmail(receiptEmail);
             paymentRepository.save(payment);
         }
     }
@@ -118,7 +116,6 @@ public class PaymentService {
         payment.setType("WATER");
         payment.setStatus("PENDING");
         payment.setDate(start);
-        payment.setServiceId(2L); // خدمة المياه
         payment.setPaymentDate(LocalDateTime.now());
 
         paymentRepository.save(payment);
@@ -145,7 +142,6 @@ public class PaymentService {
         payment.setStatus("PENDING");
         payment.setDate(start);
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setServiceId(2L); // خدمة المياه
 
         paymentRepository.save(payment);
 
@@ -206,7 +202,6 @@ public class PaymentService {
                 payment.setType("ARNONA");
                 payment.setStatus("PENDING");
                 payment.setDate(LocalDate.of(year, month, 1));
-                payment.setServiceId(1L); // مثلاً: خدمة الأرنونا
                 payment.setPaymentDate(LocalDateTime.now());
 
                 paymentRepository.save(payment); // ✅ هنا الحفظ
@@ -260,7 +255,6 @@ public class PaymentService {
                 Payment payment = new Payment();
                 payment.setUser(user);
                 payment.setProperty(property);
-                payment.setServiceId(1L); // Assuming 1 is for water
                 payment.setAmount(request.getAmount());
                 payment.setDate(currentDateTime.toLocalDate());
                 payment.setStatus("PENDING");
@@ -355,7 +349,6 @@ public class PaymentService {
         payment.setStatus("PENDING");
         payment.setTransactionId(paymentIntent.getId());
         payment.setDate(LocalDate.now());
-        payment.setServiceId(1L); // تعيين serviceId افتراضي إذا كان غير متوفر
 
         paymentRepository.save(payment); // الحفظ في قاعدة البيانات
 

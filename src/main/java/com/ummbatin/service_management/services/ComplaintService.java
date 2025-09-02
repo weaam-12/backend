@@ -43,7 +43,7 @@ public class ComplaintService {
             complaint.setStatus("SUBMITTED");
         }
 
-        // 👇 إنشاء رقم التذكرة
+        //  إنشاء رقم التذكرة
         String ticket = "TKT-" + LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + "-" + ThreadLocalRandom.current().nextInt(1000, 9999);

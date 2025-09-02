@@ -45,16 +45,14 @@ public class StripeWebhookController {
             if (session != null) {
                 Map<String, String> metadata = session.getMetadata();
                 String userId = metadata != null ? metadata.get("user_id") : null;
-                String serviceId = metadata != null ? metadata.get("service_id") : null;
                 String paymentIntentId = session.getPaymentIntent();
                 String receiptEmail = session.getCustomerDetails() != null ?
                         session.getCustomerDetails().getEmail() : null;
 
-                if (userId != null && serviceId != null && paymentIntentId != null) {
+                if (userId != null  && paymentIntentId != null) {
                     try {
                         paymentService.markPaymentAsCompleted(
                                 Long.parseLong(userId),
-                                serviceId,
                                 paymentIntentId,
                                 receiptEmail
                         );

@@ -30,8 +30,6 @@ public class Payment {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @Column(name = "service_id", nullable = false)
-    private Long serviceId;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -43,11 +41,6 @@ public class Payment {
     @Column(name = "transaction_id", unique = true)
     private String transactionId;
 
-    @Column(name = "payment_link")
-    private String paymentLink;
-
-    @Column(name = "receipt_email")
-    private String receiptEmail;
 
     @Column(name = "type")
     private String type;
@@ -76,14 +69,6 @@ public class Payment {
 
     public void setProperty(Property property) {
         this.property = property;
-    }
-
-    public Long getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
     }
 
     public Double getAmount() {
@@ -126,21 +111,6 @@ public class Payment {
         this.paymentDate = paymentDate;
     }
 
-    public String getPaymentLink() {
-        return paymentLink;
-    }
-
-    public void setPaymentLink(String paymentLink) {
-        this.paymentLink = paymentLink;
-    }
-
-    public String getReceiptEmail() {
-        return receiptEmail;
-    }
-
-    public void setReceiptEmail(String receiptEmail) {
-        this.receiptEmail = receiptEmail;
-    }
 
     public String getType() {
         return type;

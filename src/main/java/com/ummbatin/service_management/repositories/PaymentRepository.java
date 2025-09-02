@@ -27,7 +27,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     );
     Optional<Payment> findByUser_UserIdAndServiceIdAndTransactionId(
             Long userId,
-            Long serviceId,
             String transactionId
     );
     List<Payment> findByUser_UserIdAndTypeAndDateBetween(
