@@ -25,7 +25,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
-    Optional<Payment> findByUser_UserIdAndServiceIdAndTransactionId(
+    Optional<Payment> findByUser_UserIdAndTransactionId(
             Long userId,
             String transactionId
     );

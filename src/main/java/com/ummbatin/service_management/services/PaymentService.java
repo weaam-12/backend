@@ -85,7 +85,7 @@ public class PaymentService {
     }
 
     public void markPaymentAsCompleted(Long userId, String paymentIntentId, String receiptEmail) {
-        Optional<Payment> optionalPayment = paymentRepository.findByUser_UserIdAndServiceIdAndTransactionId(
+        Optional<Payment> optionalPayment = paymentRepository.findByUser_UserIdAndTransactionId(
                 userId,
                 paymentIntentId
         );
