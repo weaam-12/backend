@@ -49,7 +49,7 @@ public class PaymentService {
         return PaymentIntent.create(params);
     }
     public Payment createPayment(Long userId, Double amount, String type, String transactionId) {
-        // 1. التحقق من وجود فاتورة لنفس المستخدم ونفس النوع في الشهر الحالي
+        // 1. التحقق من وجود فاتورة لنفהבس المستخدم ونفس النوع في الشهر الحالي
         LocalDate now = LocalDate.now();
         LocalDate firstOfMonth = now.withDayOfMonth(1);
         LocalDate lastOfMonth = now.withDayOfMonth(now.lengthOfMonth());
