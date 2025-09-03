@@ -285,7 +285,6 @@ public class PaymentService {
                     reading.setProperty(property);
                     reading.setAmount(request.getCurrentReading());
                     reading.setDate(currentDateTime);
-                    reading.setManual(request.getManual() != null ? request.getManual() : false);
                     waterReadingRepository.save(reading);
                 }
 
@@ -322,7 +321,6 @@ public class PaymentService {
                 if (!readings.isEmpty()) {
                     WaterReading latestReading = readings.get(0);
                     dto.setLastWaterReading(latestReading.getAmount());
-                    dto.setManual(latestReading.getManual());
                 }
             }
 
