@@ -10,19 +10,19 @@ import com.ummbatin.service_management.repositories.*;
 import com.ummbatin.service_management.services.EnrollmentService;
 import com.ummbatin.service_management.services.PaymentService;
 
+import com.ummbatin.service_management.services.PropertyService;
 import com.ummbatin.service_management.services.StripeService;
 import com.ummbatin.service_management.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.ummbatin.service_management.repositories.ChildRepository;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/payments") // أضف /api هنا
@@ -48,8 +48,13 @@ public class PaymentController {
     private PropertyRepository propertyRepository;
 
     @Autowired
+    private WaterReadingRepository waterReadingRepository;
+
+    @Autowired
     private StripeService stripeService;
 
+    @Autowired
+    private PropertyService propertyService;
 
     @Autowired
     private EnrollmentService enrollmentService;
@@ -67,6 +72,8 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PaymentDto>> getUserPayments(@PathVariable Long userId) {
@@ -237,6 +244,63 @@ public class PaymentController {
                     .body(new ApiResponse(false, "Failed to update payment status: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/generate-water-readings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> generateWaterReadings(@RequestBody List<WaterReadingRequestDTO> readingsData) {
+        try {
+            List<WaterReading> createdReadings = new ArrayList<>();
+
+            for (WaterReadingRequestDTO readingData : readingsData) {
+                // حفظ قراءة المياه (WaterReading)
+                WaterReading waterReading = new WaterReading();
+                waterReading.setAmount(readingData.getAmount());
+                waterReading.setDate(readingData.getDate() != null ? readingData.getDate() : LocalDateTime.now());
+                waterReading.setReading(readingData.getReading());
+
+                // الحصول على Property وإضافته
+                Property property = propertyService.getPropertyById(readingData.getPropertyId())
+                        .orElseThrow(() -> new RuntimeException("Property not found with id: " + readingData.getPropertyId()));
+                waterReading.setProperty(property);
+
+                WaterReading savedReading = waterReadingRepository.save(waterReading);
+                createdReadings.add(savedReading);
+            }
+
+            return ResponseEntity.ok().body(Map.of(
+                    "success", true,
+                    "message", "تم إنشاء قراءات المياه بنجاح",
+                    "readingsCount", createdReadings.size(),
+                    "readings", createdReadings
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/create-water-payment")
+    public ResponseEntity<?> createWaterPayment(@RequestBody WaterPaymentRequest request) {
+        try {
+            Payment payment = paymentService.createWaterPayment(
+                    request.getUserId(),
+                    request.getPropertyId(),
+                    request.getAmount(),
+                    request.getStatus()
+            );
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "paymentId", payment.getPaymentId(),
+                    "message", "تم إنشاء فاتورة المياه بنجاح"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
     @GetMapping("/current-month")
     public ResponseEntity<List<PaymentDto>> getCurrentMonthPayments() {
         try {

@@ -37,13 +37,9 @@ public class WaterReadingController {
     public WaterReading createWaterReading(@RequestBody Map<String, Object> payload) {
         Long propertyId = Long.valueOf(payload.get("propertyId").toString());
         Double amount = Double.valueOf(payload.get("amount").toString());
-        Boolean approved = Boolean.valueOf(payload.get("approved").toString());
-        Boolean isManual = Boolean.valueOf(payload.get("isManual").toString());
 
         WaterReading waterReading = new WaterReading();
         waterReading.setAmount(amount);
-        waterReading.setApproved(approved);
-        waterReading.setManual(isManual);
         waterReading.setDate(LocalDateTime.now());
 
         // احصل على Property من الخدمة

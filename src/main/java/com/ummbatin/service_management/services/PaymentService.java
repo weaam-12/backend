@@ -237,6 +237,25 @@ public class PaymentService {
         return dto;
     }
 
+
+    public Payment createWaterPayment(Long userId, Long propertyId, Double amount, String status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Property property = propertyRepository.findById(Math.toIntExact(propertyId))
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        Payment payment = new Payment();
+        payment.setUser(user);
+        payment.setProperty(property);
+        payment.setAmount(amount);
+        payment.setType("WATER");
+        payment.setStatus(status);
+        payment.setDate(LocalDate.now());
+        payment.setPaymentDate(LocalDateTime.now());
+
+        return paymentRepository.save(payment);
+    }
+
     public ApiResponse generateCustomWaterPayments(List<CustomWaterPaymentRequest> requests) {
         try {
             LocalDateTime currentDateTime = LocalDateTime.now();
@@ -266,7 +285,6 @@ public class PaymentService {
                     reading.setProperty(property);
                     reading.setAmount(request.getCurrentReading());
                     reading.setDate(currentDateTime);
-                    reading.setApproved(true);
                     reading.setManual(request.getManual() != null ? request.getManual() : false);
                     waterReadingRepository.save(reading);
                 }

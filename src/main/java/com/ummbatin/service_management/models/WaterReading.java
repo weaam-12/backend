@@ -17,14 +17,12 @@ public class WaterReading {
     @Column(name = "amount", nullable = false)
     private Double amount;
 
-    @Column(name = "approved", nullable = false)
-    private Boolean approved;
 
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "is_manual", nullable = false)
-    private Boolean isManual;
+    @Column(name = "reading", nullable = false)
+    private LocalDateTime reading;
 
     public Long getId() {
         return id;
@@ -42,13 +40,6 @@ public class WaterReading {
         this.amount = amount;
     }
 
-    public Boolean getApproved() {
-        return approved;
-    }
-
-    public void setApproved(Boolean approved) {
-        this.approved = approved;
-    }
 
     public LocalDateTime getDate() {
         return date;
@@ -58,13 +49,6 @@ public class WaterReading {
         this.date = date;
     }
 
-    public Boolean getManual() {
-        return isManual;
-    }
-
-    public void setManual(Boolean manual) {
-        isManual = manual;
-    }
 
     public Property getProperty() {
         return property;
@@ -72,5 +56,8 @@ public class WaterReading {
 
     public void setProperty(Property property) {
         this.property = property;
+    }
+
+    public void setReading(Double reading) {
     }
 }
