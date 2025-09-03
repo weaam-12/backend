@@ -249,22 +249,32 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> generateWaterReadings(@RequestBody List<WaterReadingRequestDTO> readingsData) {
         try {
+            System.out.println("Received " + readingsData.size() + " water readings");
+
             List<WaterReading> createdReadings = new ArrayList<>();
 
             for (WaterReadingRequestDTO readingData : readingsData) {
-                // حفظ قراءة المياه (WaterReading)
+                System.out.println("Processing property ID: " + readingData.getPropertyId());
+
+                // الحصول على Property أولاً
+                Optional<Property> propertyOpt = propertyService.getPropertyById(readingData.getPropertyId());
+                if (propertyOpt.isEmpty()) {
+                    System.out.println("Property not found: " + readingData.getPropertyId());
+                    continue; // تخطي إذا لم يتم العثور على property
+                }
+
+                Property property = propertyOpt.get();
+
+                // حفظ قراءة المياه
                 WaterReading waterReading = new WaterReading();
-                waterReading.setReading(readingData.getReading()); // قراءة العداد
+                waterReading.setReading(readingData.getReading());
                 waterReading.setAmount(readingData.getAmount());
                 waterReading.setDate(readingData.getDate() != null ? readingData.getDate() : LocalDateTime.now());
-
-                // الحصول على Property وإضافته
-                Property property = propertyService.getPropertyById(readingData.getPropertyId())
-                        .orElseThrow(() -> new RuntimeException("Property not found with id: " + readingData.getPropertyId()));
                 waterReading.setProperty(property);
 
                 WaterReading savedReading = waterReadingRepository.save(waterReading);
                 createdReadings.add(savedReading);
+                System.out.println("Saved reading for property: " + property.getPropertyId());
             }
 
             return ResponseEntity.ok().body(Map.of(
@@ -275,6 +285,8 @@ public class PaymentController {
             ));
 
         } catch (Exception e) {
+            System.out.println("Error in generateWaterReadings: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "error", e.getMessage()));
         }
