@@ -254,9 +254,9 @@ public class PaymentController {
             for (WaterReadingRequestDTO readingData : readingsData) {
                 // حفظ قراءة المياه (WaterReading)
                 WaterReading waterReading = new WaterReading();
+                waterReading.setReading(readingData.getReading()); // قراءة العداد
                 waterReading.setAmount(readingData.getAmount());
                 waterReading.setDate(readingData.getDate() != null ? readingData.getDate() : LocalDateTime.now());
-                waterReading.setReading(readingData.getReading());
 
                 // الحصول على Property وإضافته
                 Property property = propertyService.getPropertyById(readingData.getPropertyId())

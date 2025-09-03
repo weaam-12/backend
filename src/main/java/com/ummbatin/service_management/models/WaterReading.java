@@ -21,7 +21,7 @@ public class WaterReading {
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "reading", nullable = false)
+    @Column(name = "reading", nullable = true)
     private LocalDateTime reading;
 
     public Long getId() {
