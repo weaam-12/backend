@@ -15,8 +15,7 @@ public interface ChildRepository extends JpaRepository<Child, Integer> {
     List<Child> findByUserId(@Param("userId") Long userId);
 
     // أو باستخدام صيغة JPA المدمجة
-    @Query("SELECT c FROM Child c WHERE c.user.userId = :userId")
-    List<Child> findAllByUserId(@Param("userId") Long userId);
+    List<Child> findByUser_UserId(Long userId);
 
     @Query("SELECT c FROM Child c WHERE c.wife.id = :wifeId")
     List<Child> findByWifeId(@Param("wifeId") Long wifeId);

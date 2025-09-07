@@ -112,10 +112,16 @@ public class ChildController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Child>> getChildrenByUser(@PathVariable Long userId) {
-        System.out.println("Fetching children for userId = " + userId);
-        List<Child> children = childService.getChildrenByUserId(userId);
-        System.out.println("Children found: " + children.size());
-        return ResponseEntity.ok(children);
+        System.out.println("📌 Entered getChildrenByUser with userId: " + userId);
+        try {
+            List<Child> children = childService.getChildrenByUserId(userId);
+            System.out.println("✅ Children found: " + children.size());
+            return ResponseEntity.ok(children);
+        } catch (Exception e) {
+            System.out.println("❌ Exception: " + e.getMessage());
+            e.printStackTrace(); // <— مهم جداً
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PatchMapping("/{childId}/assign")
