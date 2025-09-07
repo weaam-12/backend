@@ -24,9 +24,8 @@ public class ChildService {
     }
 
     public List<Child> getChildrenByUserId(Long userId) {
-        return childRepository.findByUser_UserId(userId);
+        return childRepository.findAllByUserId(userId);   // أو الـ Query المخصّصة
     }
-
     public List<Child> getChildrenByWifeId(Long wifeId) {
         return childRepository.findByWifeId(wifeId);
     }

@@ -112,7 +112,9 @@ public class ChildController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Child>> getChildrenByUser(@PathVariable Long userId) {
+        System.out.println("Fetching children for userId = " + userId);
         List<Child> children = childService.getChildrenByUserId(userId);
+        System.out.println("Children found: " + children.size());
         return ResponseEntity.ok(children);
     }
 
